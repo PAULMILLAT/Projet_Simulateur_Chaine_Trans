@@ -1,0 +1,7 @@
+# !/bin/bash
+echo "Running tests..."
+java -cp bin HelloWorld
+java -cp bin HelloWorld toto
+java -cp bin HelloWorld titi tata
+java -cp bin HelloWorld 2026
+echo "Done ! "

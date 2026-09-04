@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Nettoyage en cours..."
+
+# Suppression du contenu de bin et docs sans supprimer les dossiers
+rm -rf bin/* docs/* 2>/dev/null
+
+# Suppression des éventuelles archives tar.gz (anticipation question 3.2)
+rm -f *.tar.gz 2>/dev/null
+
+# On s'assure que les dossiers bin et docs existent bien et sont vides
+mkdir -p bin docs
+
+echo "Nettoyage terminé : bin/ et docs/ sont vides, archives supprimées."

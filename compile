@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Compilation en cours..."
+javac -d bin -sourcepath src src/HelloWorld.java
+echo "Compilation terminée. Les fichiers .class ont été générés dans le répertoire bin."
+

@@ -1,0 +1,6 @@
+#!/bin/bash
+. ./cleanAll
+echo "Generating project deliverable : Plougonven-x.tar.gz"
+tar -czf Plougonven-x.tar.gz src/HelloWorld.java bin docs compile \
+runTests genDoc hello cleanAll readme.txt
+echo "Done !"

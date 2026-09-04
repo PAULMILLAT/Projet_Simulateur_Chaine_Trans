@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "Génération de la Javadoc en cours..."
+javadoc -d docs -sourcepath src src/HelloWorld.java
+echo "Documentation Javadoc générée avec succès dans le répertoire docs/."
