@@ -1,0 +1,6 @@
+#!/bin/sh
+# Script de lancement du simulateur de chaine de transmission
+# Prend en compte les arguments de la ligne de commande et les transmet à la classe Java Simulateur
+# @author Yann
+
+java -cp bin simulateur.Simulateur "$@"

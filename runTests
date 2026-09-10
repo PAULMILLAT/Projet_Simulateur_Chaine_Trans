@@ -1,0 +1,65 @@
+#!/bin/sh
+# Script d'autotests pour l'Etape 1 du projet SIT213
+# TODO GENERE PAR Yann à l'aide de l'IA pour test rapide, A REMPLACER PAR DES TESTS JAVA
+
+echo "=== Lancement des tests SIT213 - Etape 1 ==="
+
+NB_TESTS=0
+NB_SUCCES=0
+NB_ECHECS=0
+
+run_test_succes() {
+    NB_TESTS=$((NB_TESTS + 1))
+    desc="$1"
+    shift
+    printf "Test %d: %-50s ... " "$NB_TESTS" "$desc"
+    output=$(sh ./simulateur "$@" 2>&1)
+    status=$?
+    if [ $status -eq 0 ] && echo "$output" | grep -q "TEB : 0\.0"; then
+        echo "OK"
+        NB_SUCCES=$((NB_SUCCES + 1))
+    else
+        echo "ECHEC (code=$status, sortie='$output')"
+        NB_ECHECS=$((NB_ECHECS + 1))
+    fi
+}
+
+run_test_erreur() {
+    NB_TESTS=$((NB_TESTS + 1))
+    desc="$1"
+    shift
+    printf "Test %d: %-50s ... " "$NB_TESTS" "$desc"
+    output=$(sh ./simulateur "$@" 2>&1)
+    status=$?
+    if [ $status -ne 0 ]; then
+        echo "OK (erreur attendue detectee)"
+        NB_SUCCES=$((NB_SUCCES + 1))
+    else
+        echo "ECHEC (une erreur etait attendue, sortie='$output')"
+        NB_ECHECS=$((NB_ECHECS + 1))
+    fi
+}
+
+# 1. Tests nominaux (chaine logique parfaite => TEB attendu = 0.0)
+run_test_succes "Execution par defaut (100 bits aleatoires)"
+run_test_succes "Message fixe 8 bits" -mess 01010101
+run_test_succes "Message fixe 16 bits" -mess 1100101011110000
+run_test_succes "Message aleatoire de 50 bits" -mess 50
+run_test_succes "Message aleatoire de 500 bits" -mess 500
+run_test_succes "Message aleatoire avec germe (-seed 42)" -mess 100 -seed 42
+run_test_succes "Message aleatoire avec germe (-seed 12345)" -seed 12345
+
+# 2. Tests de robustesse (arguments invalides attendus en echec)
+run_test_erreur "Argument option inconnue" -invalide
+run_test_erreur "Longueur de message nulle (-mess 0)" -mess 0
+run_test_erreur "Germe non numerique (-seed abc)" -seed abc
+run_test_erreur "Format message invalide (-mess abc)" -mess abc
+
+echo ""
+echo "=== Bilan des tests : $NB_SUCCES/$NB_TESTS reussis ($NB_ECHECS echecs) ==="
+
+if [ $NB_ECHECS -eq 0 ]; then
+    exit 0
+else
+    exit 1
+fi

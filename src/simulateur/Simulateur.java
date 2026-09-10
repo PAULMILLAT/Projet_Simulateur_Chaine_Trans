@@ -1,7 +1,13 @@
 package simulateur;
 import destinations.Destination;
+import destinations.DestinationFinale;
+import information.Information;
 import sources.Source;
+import sources.SourceAleatoire;
+import sources.SourceFixe;
 import transmetteurs.Transmetteur;
+import transmetteurs.TransmetteurParfait;
+import visualisations.SondeLogique;
 
 
 /** La classe Simulateur permet de construire et simuler une chaîne de
@@ -57,8 +63,31 @@ public class Simulateur {
     	// analyser et récupérer les arguments   	
     	analyseArguments(args);
       
-      	// TODO : Partie à compléter
-      		
+      	// Instanciation de la source
+      	if (messageAleatoire) {
+      		if (aleatoireAvecGerme) {
+      			source = new SourceAleatoire(nbBitsMess, seed);
+      		} else {
+      			source = new SourceAleatoire(nbBitsMess);
+      		}
+      	} else {
+      		source = new SourceFixe(messageString);
+      	}
+
+      	// Instanciation du transmetteur parfait et de la destination finale
+      	transmetteurLogique = new TransmetteurParfait<Boolean>();
+      	destination = new DestinationFinale();
+
+      	// Connexion des sondes logiques si demandé (-s)
+      	if (affichage) {
+      		final int nbPixels = 30;
+      		source.connecter(new SondeLogique("Source", nbPixels));
+      		transmetteurLogique.connecter(new SondeLogique("Transmetteur", nbPixels));
+      	}
+
+      	// Connexion de la chaîne de transmission
+      	source.connecter(transmetteurLogique);
+      	transmetteurLogique.connecter(destination);
     }
    
    
@@ -135,9 +164,7 @@ public class Simulateur {
      *
      */ 
     public void execute() throws Exception {      
-         
-    	// TODO : typiquement source.emettre(); 
-      	     	      
+    	source.emettre(); 
     }
    
    	   	
@@ -146,12 +173,32 @@ public class Simulateur {
      * les bits du message émis avec ceux du message reçu.
      *
      * @return  La valeur du Taux dErreur Binaire.
+     * @author Yann (avec aide de l'IA pour éviter les erreurs dans certains cas exeptionnels)
      */   	   
     public float  calculTauxErreurBinaire() {
+    	Information<Boolean> infoEmise = source.getInformationEmise();
+    	Information<Boolean> infoRecue = destination.getInformationRecue();
 
-    	// TODO : A compléter
+        // Test proposé par l'IA pour éviter les erreurs dans certains cas exeptionnels 
+        // ne risquant plus d'arriver. Commenté au cas où on en aurait besoin plus tard.
+    	// if (infoEmise == null || infoRecue == null || infoEmise.nbElements() == 0) {
+    	// 	return 0.0f;
+    	// }
 
-    	return  0.0f;
+    	int nbErreurs = 0;
+    	int nbElementsEmis = infoEmise.nbElements();
+    	int nbElementsRecus = infoRecue.nbElements();
+    	int nbElementsCommuns = Math.min(nbElementsEmis, nbElementsRecus);
+
+    	for (int i = 0; i < nbElementsCommuns; i++) {
+    		if (!infoEmise.iemeElement(i).equals(infoRecue.iemeElement(i))) {
+    			nbErreurs++;
+    		}
+    	}
+
+    	nbErreurs += Math.abs(nbElementsEmis - nbElementsRecus);
+
+    	return (float) nbErreurs / (float) nbElementsEmis;
     }
    
    
