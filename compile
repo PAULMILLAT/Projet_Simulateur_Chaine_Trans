@@ -1,5 +1,33 @@
-#!/bin/bash
-echo "Compilation en cours..."
-javac -d bin -sourcepath src src/HelloWorld.java
-echo "Compilation terminée. Les fichiers .class ont été générés dans le répertoire bin."
+#!/bin/sh
+# Compile l'ensemble des sources Java du projet (src/) vers le repertoire bin/.
+# Le code de retour du script est celui de javac : 0 si tout s'est bien passe.
 
+echo "Compilation en cours..."
+
+# bin/ peut ne pas exister (clone frais, apres un cleanAll...)
+mkdir -p bin
+
+# On passe la liste des sources a javac via un fichier d'arguments (@fichier)
+# plutot que par substitution de commande : cela evite les problemes de noms
+# contenant des espaces et la limite de longueur de la ligne de commande.
+LISTE_SOURCES=$(mktemp)
+find src -name "*.java" > "$LISTE_SOURCES"
+
+if [ ! -s "$LISTE_SOURCES" ]; then
+    echo "Erreur : aucun fichier .java trouve dans src/"
+    rm -f "$LISTE_SOURCES"
+    exit 1
+fi
+
+javac -d bin -sourcepath src -encoding UTF-8 "@$LISTE_SOURCES"
+STATUT=$?
+
+rm -f "$LISTE_SOURCES"
+
+if [ $STATUT -eq 0 ]; then
+    echo "Compilation terminee. Les fichiers .class ont ete generes dans bin/."
+else
+    echo "Echec de la compilation."
+fi
+
+exit $STATUT

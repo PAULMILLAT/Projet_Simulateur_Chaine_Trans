@@ -1,4 +1,45 @@
-#!/bin/bash
-echo "Génération de la Javadoc en cours..."
-javadoc -d docs -sourcepath src src/HelloWorld.java
-echo "Documentation Javadoc générée avec succès dans le répertoire docs/."
+#!/bin/sh
+# Genere la documentation javadoc de l'ensemble des sources (src/) dans docs/.
+# Le code de retour du script est celui de javadoc : 0 si tout s'est bien passe.
+
+echo "Generation de la javadoc en cours..."
+
+# docs/ peut ne pas exister (clone frais, apres un cleanAll...)
+mkdir -p docs
+
+# Meme technique que dans 'compile' : la liste des sources est passee a
+# javadoc via un fichier d'arguments (@fichier).
+LISTE_SOURCES=$(mktemp)
+find src -name "*.java" > "$LISTE_SOURCES"
+
+if [ ! -s "$LISTE_SOURCES" ]; then
+    echo "Erreur : aucun fichier .java trouve dans src/"
+    rm -f "$LISTE_SOURCES"
+    exit 1
+fi
+
+# -encoding   : encodage des fichiers source lus
+# -docencoding: encodage des fichiers HTML produits
+# -charset    : encodage declare dans les en-tetes HTML
+# -private    : documente aussi les membres prives (utile en interne)
+# -Xdoclint:all,-html : garde tous les controles de documentation SAUF la
+#               validation HTML, qui rejette les types generiques ecrits en
+#               clair dans les commentaires (ex : Source <Boolean>).
+javadoc -d docs -sourcepath src \
+        -encoding UTF-8 -docencoding UTF-8 -charset UTF-8 \
+        -private \
+        -Xdoclint:all,-html \
+        -windowtitle "Simulateur de chaine de transmission - SIT213" \
+        -doctitle "Simulateur de chaine de transmission - SIT213" \
+        "@$LISTE_SOURCES"
+STATUT=$?
+
+rm -f "$LISTE_SOURCES"
+
+if [ $STATUT -eq 0 ]; then
+    echo "Javadoc generee avec succes dans docs/."
+else
+    echo "Echec de la generation de la javadoc."
+fi
+
+exit $STATUT
