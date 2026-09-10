@@ -1,5 +1,0 @@
-#!/bin/bash
-echo "Ceci est un fichier de commandes"
-ls
-echo "Terminé !"
-
