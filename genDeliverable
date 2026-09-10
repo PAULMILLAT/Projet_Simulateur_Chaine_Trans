@@ -1,5 +1,5 @@
 #!/bin/bash
 . ./cleanAll
 echo "Generating project deliverable : Millat-Plougonven.SIT213.Etape.tar.gz"
-tar -czf Millat-Plougonven.SIT213.Etape.tar.gz src bin docs compile runTests genDoc cleanAll ai_prompts.md README.md
+tar -czf Millat-Plougonven.SIT213.Etape.tar.gz src bin docs tests compile runTests genDoc cleanAll ai_prompts.md README.md
 echo "Done !"
