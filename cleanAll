@@ -2,6 +2,7 @@
 # Remet le projet dans un etat "propre" : ni .class, ni javadoc, ni archive.
 # ATTENTION : ce script est parfois execute via '. ./cleanAll' (sourcing),
 # il ne doit donc surtout PAS contenir de 'exit' qui tuerait le shell appelant.
+# @author Paul
 
 echo "Nettoyage en cours..."
 

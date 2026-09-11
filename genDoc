@@ -1,6 +1,7 @@
 #!/bin/sh
 # Genere la documentation javadoc de l'ensemble des sources (src/) dans docs/.
 # Le code de retour du script est celui de javadoc : 0 si tout s'est bien passe.
+# @author Paul
 
 echo "Generation de la javadoc en cours..."
 

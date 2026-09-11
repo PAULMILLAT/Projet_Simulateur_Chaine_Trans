@@ -1,6 +1,7 @@
 #!/bin/sh
 # Script d'autotests pour l'Etape 1 du projet SIT213
 # TODO GENERE PAR Yann à l'aide de l'IA pour test rapide, A REMPLACER PAR DES TESTS JAVA
+# @ author Yann, IA
 
 echo "=== Lancement des tests SIT213 - Etape 1 ==="
 

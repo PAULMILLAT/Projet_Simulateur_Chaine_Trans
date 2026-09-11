@@ -1,6 +1,7 @@
 #!/bin/sh
 # Compile l'ensemble des sources Java du projet (src/) vers le repertoire bin/.
 # Le code de retour du script est celui de javac : 0 si tout s'est bien passe.
+# @author Paul
 
 echo "Compilation en cours..."
 

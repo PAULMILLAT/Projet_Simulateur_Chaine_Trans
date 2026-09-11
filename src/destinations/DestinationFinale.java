@@ -4,6 +4,7 @@ import information.Information;
 /**
  * Destination terminale d'une chaîne de transmission : elle se contente
  * de mémoriser l'information booléenne qu'elle reçoit.
+ * @author Paul
  */
 public class DestinationFinale extends Destination<Boolean> {
 
