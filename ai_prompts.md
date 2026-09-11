@@ -14,4 +14,7 @@ La majorité des prompts non concluants (absence de réponse pertinente de l'IA 
 * Explique moi comment gérer/utiliser l'hérédité des classes de mon projet, je suis débutant
 * Ecris moi le fichier runTests pour tester l'étape 1 de mon projet
     * Par manque de temps, je n'ai pas eu le temps de créer de vrai tests Java. Les tests via commandes bash ont donc entièrement été générés par IA et vont probablement être supprimés/remplacés dans le futur par un travail plus propre.
+* Reprends mon code et ajoute le balisage pour la javadoc et ajoute les commentaires que j'ai oublié
+* Refais une passe sur mon code et propose des amélioration pour le code 
+  
 
