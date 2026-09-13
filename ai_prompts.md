@@ -16,5 +16,10 @@ La majorité des prompts non concluants (absence de réponse pertinente de l'IA 
     * Par manque de temps, je n'ai pas eu le temps de créer de vrai tests Java. Les tests via commandes bash ont donc entièrement été générés par IA et vont probablement être supprimés/remplacés dans le futur par un travail plus propre.
 * Reprends mon code et ajoute le balisage pour la javadoc et ajoute les commentaires que j'ai oublié
 * Refais une passe sur mon code et propose des amélioration pour le code 
+
+## Prompts du TP2
+* Quand il y avait un merge conflict dans vsc avant avec GitHub, vsc m'ouvrait une interface pour choisir en quelques clics quels lignes garder. Maintenant ça m'affiche juste une pop up avec une erreur
+* Le message est juste qu'il ne peut pas merge car y'a un conflit
+    * Gemini m'a aidé à débogger le problème. Après quelques manipulations (redémarrage de VSCode et git reset notamment), le problème à disparu et j'ai pu à nouveau résoudre les merge conflicts, qui seront forcément nombreux au court du projet étant donné que nous développons à 4 en même temps.
   
 
