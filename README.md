@@ -30,4 +30,4 @@ activé). Par défaut le simulateur n’utilise pas de semence pour
 initialiser ses générateurs aléatoires.
 
 ## Détails techniques
-Ce projet est développé sous Windows, mais livré dans un format compatible avec l'environnement Debian de l'école.
+Ce projet est développé sous Windows, mais livré dans un format compatible avec l'environnement Debian de l'école..
