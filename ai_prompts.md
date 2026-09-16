@@ -21,5 +21,7 @@ La majorité des prompts non concluants (absence de réponse pertinente de l'IA 
 * Quand il y avait un merge conflict dans vsc avant avec GitHub, vsc m'ouvrait une interface pour choisir en quelques clics quels lignes garder. Maintenant ça m'affiche juste une pop up avec une erreur
 * Le message est juste qu'il ne peut pas merge car y'a un conflit
     * Gemini m'a aidé à débogger le problème. Après quelques manipulations (redémarrage de VSCode et git reset notamment), le problème à disparu et j'ai pu à nouveau résoudre les merge conflicts, qui seront forcément nombreux au court du projet étant donné que nous développons à 4 en même temps.
-  
+* J'ai une erreur Error: Could not find or load main class tests.TestSimulateur
+Caused by: java.lang.ClassNotFoundException: tests.TestSimulateur quand j'execute .\runtests
+    * Le script runtests n'arrivait pas à ouvrir les fichiers .class des tests car le script compile ne prenait pas en charge. Sur recommandation de l'IA, nous avons amélioré ces deux derniers scripts. L'IA nous a aussi prévenu que genDoc ne prenait pas non plus en charge les tests, ce que nous avons corrigé
 
