@@ -1,9 +1,26 @@
 #!/bin/sh
 # Script d'autotests pour l'Etape 1 du projet SIT213
-# TODO GENERE PAR Yann à l'aide de l'IA pour test rapide, A REMPLACER PAR DES TESTS JAVA
+# Les tests en bash sont générés à l'aide de copilot.
+# L'appel des tests Java a été écrite à la main.
 # @ author Yann, IA
 
 echo "=== Lancement des tests SIT213 - Etape 1 ==="
+echo "========================================="
+echo "1. Lancement de la suite de tests Java"
+echo "========================================="
+
+java -cp bin tests.TestSimulateur
+STATUT_JAVA=$?
+
+if [ $STATUT_JAVA -ne 0 ]; then
+    echo "Echec des tests unitaires Java !"
+    exit $STATUT_JAVA
+fi
+
+echo ""
+echo "========================================="
+echo "2. Lancement des tests d'integration CLI "
+echo "========================================="
 
 NB_TESTS=0
 NB_SUCCES=0
@@ -14,6 +31,7 @@ run_test_succes() {
     desc="$1"
     shift
     printf "Test %d: %-50s ... " "$NB_TESTS" "$desc"
+    printf "Test %d: %-55s ... " "$NB_TESTS" "$desc"
     output=$(sh ./simulateur "$@" 2>&1)
     status=$?
     if [ $status -eq 0 ] && echo "$output" | grep -q "TEB : 0\.0"; then
@@ -30,6 +48,7 @@ run_test_erreur() {
     desc="$1"
     shift
     printf "Test %d: %-50s ... " "$NB_TESTS" "$desc"
+    printf "Test %d: %-55s ... " "$NB_TESTS" "$desc"
     output=$(sh ./simulateur "$@" 2>&1)
     status=$?
     if [ $status -ne 0 ]; then
@@ -42,6 +61,8 @@ run_test_erreur() {
 }
 
 # 1. Tests nominaux (chaine logique parfaite => TEB attendu = 0.0)
+# --- Tests TP1 : Chaine logique ---
+echo "--- Tests TP1 : Chaine logique ---"
 run_test_succes "Execution par defaut (100 bits aleatoires)"
 run_test_succes "Message fixe 8 bits" -mess 01010101
 run_test_succes "Message fixe 16 bits" -mess 1100101011110000
@@ -51,13 +72,29 @@ run_test_succes "Message aleatoire avec germe (-seed 42)" -mess 100 -seed 42
 run_test_succes "Message aleatoire avec germe (-seed 12345)" -seed 12345
 
 # 2. Tests de robustesse (arguments invalides attendus en echec)
+# --- Tests TP2 : Chaine analogique ---
+echo "\n--- Tests TP2 : Chaine analogique ---"
+run_test_succes "Transmission NRZ (-form NRZ)" -form NRZ
+run_test_succes "Transmission RZ explicite (-form RZ)" -form RZ
+run_test_succes "Transmission NRZT (-form NRZT -ampl -5.0 5.0)" -form NRZT -ampl -5.0 5.0
+run_test_succes "Transmission analogique par defaut RZ (-nbEch 45)" -nbEch 45
+run_test_succes "Transmission NRZ avec nbEch=60 et message fixe" -form NRZ -nbEch 60 -mess 0101010101
+
+# --- Tests de robustesse et contraintes ---
+echo "\n--- Tests de robustesse & rejets d'arguments ---"
 run_test_erreur "Argument option inconnue" -invalide
 run_test_erreur "Longueur de message nulle (-mess 0)" -mess 0
 run_test_erreur "Germe non numerique (-seed abc)" -seed abc
 run_test_erreur "Format message invalide (-mess abc)" -mess abc
+run_test_erreur "Rejet RZ avec min != 0 (-form RZ -ampl -5.0 5.0)" -form RZ -ampl -5.0 5.0
+run_test_erreur "Rejet NRZ avec min > 0 (-form NRZ -ampl 1.0 5.0)" -form NRZ -ampl 1.0 5.0
+run_test_erreur "Rejet min >= max (-form NRZ -ampl 5.0 1.0)" -form NRZ -ampl 5.0 1.0
+run_test_erreur "Rejet nbEch <= 0 (-nbEch 0)" -nbEch 0
+run_test_erreur "Rejet forme d'onde inconnue (-form TOTO)" -form TOTO
 
 echo ""
 echo "=== Bilan des tests : $NB_SUCCES/$NB_TESTS reussis ($NB_ECHECS echecs) ==="
+echo "=== Bilan des tests CLI : $NB_SUCCES/$NB_TESTS reussis ($NB_ECHECS echecs) ==="
 
 if [ $NB_ECHECS -eq 0 ]; then
     exit 0
