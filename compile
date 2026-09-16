@@ -2,8 +2,10 @@
 # Compile l'ensemble des sources Java du projet (src/) vers le repertoire bin/.
 # Le code de retour du script est celui de javac : 0 si tout s'est bien passe.
 # @author Paul
+# @author Yann
 
 echo "Compilation en cours..."
+PATH="/usr/bin:/bin:$PATH"
 
 # bin/ peut ne pas exister (clone frais, apres un cleanAll...)
 mkdir -p bin
@@ -13,9 +15,12 @@ mkdir -p bin
 # contenant des espaces et la limite de longueur de la ligne de commande.
 LISTE_SOURCES=$(mktemp)
 find src -name "*.java" > "$LISTE_SOURCES"
+if [ -d tests ]; then
+    find tests -name "*.java" >> "$LISTE_SOURCES"
+fi
 
 if [ ! -s "$LISTE_SOURCES" ]; then
-    echo "Erreur : aucun fichier .java trouve dans src/"
+    echo "Erreur : aucun fichier .java trouve dans src/ ou tests/"
     rm -f "$LISTE_SOURCES"
     exit 1
 fi

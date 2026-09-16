@@ -4,7 +4,20 @@
 # L'appel des tests Java a été écrite à la main.
 # @ author Yann, IA
 
-echo "=== Lancement des tests SIT213 - Etape 1 ==="
+PATH="/usr/bin:/bin:$PATH"
+
+# Verifier et compiler automatiquement si les classes ne sont pas presentes
+if [ ! -f bin/tests/TestSimulateur.class ] || [ ! -f bin/simulateur/Simulateur.class ]; then
+    echo "Compilation prealable du projet..."
+    sh ./compile
+    if [ $? -ne 0 ]; then
+        echo "Echec de la compilation prealable !"
+        exit 1
+    fi
+    echo ""
+fi
+
+echo "=== Lancement des tests SIT213 - Etape 1 & 2 ==="
 echo "========================================="
 echo "1. Lancement de la suite de tests Java"
 echo "========================================="
@@ -30,7 +43,6 @@ run_test_succes() {
     NB_TESTS=$((NB_TESTS + 1))
     desc="$1"
     shift
-    printf "Test %d: %-50s ... " "$NB_TESTS" "$desc"
     printf "Test %d: %-55s ... " "$NB_TESTS" "$desc"
     output=$(sh ./simulateur "$@" 2>&1)
     status=$?
@@ -47,7 +59,6 @@ run_test_erreur() {
     NB_TESTS=$((NB_TESTS + 1))
     desc="$1"
     shift
-    printf "Test %d: %-50s ... " "$NB_TESTS" "$desc"
     printf "Test %d: %-55s ... " "$NB_TESTS" "$desc"
     output=$(sh ./simulateur "$@" 2>&1)
     status=$?
@@ -73,7 +84,8 @@ run_test_succes "Message aleatoire avec germe (-seed 12345)" -seed 12345
 
 # 2. Tests de robustesse (arguments invalides attendus en echec)
 # --- Tests TP2 : Chaine analogique ---
-echo "\n--- Tests TP2 : Chaine analogique ---"
+echo ""
+echo "--- Tests TP2 : Chaine analogique ---"
 run_test_succes "Transmission NRZ (-form NRZ)" -form NRZ
 run_test_succes "Transmission RZ explicite (-form RZ)" -form RZ
 run_test_succes "Transmission NRZT (-form NRZT -ampl -5.0 5.0)" -form NRZT -ampl -5.0 5.0
@@ -81,7 +93,8 @@ run_test_succes "Transmission analogique par defaut RZ (-nbEch 45)" -nbEch 45
 run_test_succes "Transmission NRZ avec nbEch=60 et message fixe" -form NRZ -nbEch 60 -mess 0101010101
 
 # --- Tests de robustesse et contraintes ---
-echo "\n--- Tests de robustesse & rejets d'arguments ---"
+echo ""
+echo "--- Tests de robustesse & rejets d'arguments ---"
 run_test_erreur "Argument option inconnue" -invalide
 run_test_erreur "Longueur de message nulle (-mess 0)" -mess 0
 run_test_erreur "Germe non numerique (-seed abc)" -seed abc
@@ -93,7 +106,6 @@ run_test_erreur "Rejet nbEch <= 0 (-nbEch 0)" -nbEch 0
 run_test_erreur "Rejet forme d'onde inconnue (-form TOTO)" -form TOTO
 
 echo ""
-echo "=== Bilan des tests : $NB_SUCCES/$NB_TESTS reussis ($NB_ECHECS echecs) ==="
 echo "=== Bilan des tests CLI : $NB_SUCCES/$NB_TESTS reussis ($NB_ECHECS echecs) ==="
 
 if [ $NB_ECHECS -eq 0 ]; then

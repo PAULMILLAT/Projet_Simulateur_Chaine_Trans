@@ -3,6 +3,8 @@
 # Le code de retour du script est celui de javadoc : 0 si tout s'est bien passe.
 # @author Paul
 
+PATH="/usr/bin:/bin:$PATH"
+
 echo "Generation de la javadoc en cours..."
 
 # docs/ peut ne pas exister (clone frais, apres un cleanAll...)
