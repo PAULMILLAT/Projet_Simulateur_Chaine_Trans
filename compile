@@ -25,7 +25,14 @@ if [ ! -s "$LISTE_SOURCES" ]; then
     exit 1
 fi
 
-javac -d bin -sourcepath src -encoding UTF-8 "@$LISTE_SOURCES"
+JUNIT_JAR="lib/junit-platform-console-standalone-6.1.3.jar"
+if [ ! -f "$JUNIT_JAR" ]; then
+    echo "Erreur : librairie JUnit introuvable : $JUNIT_JAR"
+    rm -f "$LISTE_SOURCES"
+    exit 1
+fi
+
+javac -cp "$JUNIT_JAR" -d bin -sourcepath src -encoding UTF-8 "@$LISTE_SOURCES"
 STATUT=$?
 
 rm -f "$LISTE_SOURCES"
