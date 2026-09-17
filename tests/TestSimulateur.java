@@ -1,4 +1,4 @@
-package tests;
+/* package tests; */
 
 /**
  * Lanceur principal de l'ensemble des tests du simulateur.
