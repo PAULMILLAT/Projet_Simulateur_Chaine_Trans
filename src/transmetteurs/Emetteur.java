@@ -100,7 +100,11 @@ public class Emetteur extends Transmetteur<Boolean, Float> {
      */
     private void genererNRZ(Boolean[] bits) {
         for (Boolean b : bits) {
+            // sélectionne amplMax si b vaut true, ou amplMin si b vaut false
             float valeur = b ? this.amplMax : this.amplMin;
+            // Ajoute ensuite cette amplitude nbEch fois dans informationEmise
+            // Ainsi, chaque bit est représenté par plusieurs échantillons identiques, 
+            // ce qui permet de générer le signal émis à partir de la suite de bits.
             for (int i = 0; i < this.nbEch; i++) {
                 this.informationEmise.add(valeur);
             }
