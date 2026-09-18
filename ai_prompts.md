@@ -84,6 +84,8 @@ Points clés à vérifier :
 
 ### TP2.2 Demande à Mistral de voir si le code est conforme : 
 
+
+tes 
 Long text expliquant le code, si il est bon au niveau des attentes puis conclusion : 
 
 """
