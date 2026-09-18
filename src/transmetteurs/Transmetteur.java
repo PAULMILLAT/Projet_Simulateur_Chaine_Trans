@@ -12,7 +12,7 @@ import java.util.*;
  * l'entrée du transmetteur implémente l'interface
  * DestinationInterface, la sortie du transmetteur implémente
  * l'interface SourceInterface
- * @author prou
+ * @author PAUL
  */
 public abstract  class Transmetteur <R,E> implements  DestinationInterface <R>, SourceInterface <E> {
    
