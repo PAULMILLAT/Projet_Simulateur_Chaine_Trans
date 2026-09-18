@@ -146,8 +146,11 @@ public class Emetteur extends Transmetteur<Boolean, Float> {
      */
     private void genererNRZT(Boolean[] bits) {
         int nbBits = bits.length;
+        // 1ère pente de montée ou descente
         int tiers1 = this.nbEch / 3;
+        // plateau 
         int tiers2 = 2 * this.nbEch / 3;
+        // 2ème pente descente/montée vers le bit suivant
         int d3 = this.nbEch - tiers2; // durée du dernier tiers
 
         for (int k = 0; k < nbBits; k++) {
