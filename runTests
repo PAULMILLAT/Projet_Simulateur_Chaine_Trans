@@ -22,7 +22,7 @@ echo "========================================="
 echo "1. Lancement de la suite de tests Java"
 echo "========================================="
 
-java -cp bin tests.TestSimulateur
+java -cp bin TestSimulateur
 STATUT_JAVA=$?
 
 if [ $STATUT_JAVA -ne 0 ]; then

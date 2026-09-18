@@ -1,4 +1,4 @@
-package tests;
+/* package tests; */
 
 import destinations.DestinationFinale;
 import information.Information;
