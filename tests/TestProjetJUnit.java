@@ -1,6 +1,11 @@
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Classe de test appellant les tests Java de manière compatible avec JUnit et Emma.
+ *
+ * @author Yann
+ */
 public class TestProjetJUnit {
 
     @Test
