@@ -9,7 +9,6 @@ import sources.SourceFixe;
 import transmetteurs.Emetteur;
 import transmetteurs.Recepteur;
 import transmetteurs.Transmetteur;
-import transmetteurs.TransmetteurBruite;
 import transmetteurs.TransmetteurAnalogiqueBruite;
 import transmetteurs.TransmetteurParfait;
 import visualisations.SondeAnalogique;
@@ -123,7 +122,6 @@ public class Simulateur {
             // --- Chaîne analogique (TP2 et TP3) ---
             emetteur = new Emetteur(formeOnde, nbEch, amplMin, amplMax);
             if (canalBruite) {
-                transmetteurAnalogique = new TransmetteurBruite(snrpb, nbEch, seed);
                 transmetteurAnalogique = new TransmetteurAnalogiqueBruite(snrpb, nbEch, seed);
             } else {
                 transmetteurAnalogique = new TransmetteurParfait<Float>();
