@@ -1,8 +1,9 @@
 #!/bin/sh
 # Script d'autotests pour l'Etape 1 du projet SIT213
-# Les tests en bash sont générés à l'aide de copilot.
-# L'appel des tests Java a été écrite à la main.
-# @ author Yann, IA
+# L'appel des tests Java a été écrit à la main par Yann
+# Les tests en bash (bonus non demandés) sont générés à l'aide de l'IA copilot.
+# @ author Yann
+# @ author copilot
 
 PATH="/usr/bin:/bin:$PATH"
 
@@ -17,7 +18,7 @@ if [ ! -f bin/tests/TestSimulateur.class ] || [ ! -f bin/simulateur/Simulateur.c
     echo ""
 fi
 
-echo "=== Lancement des tests SIT213 - Etape 1 & 2 ==="
+echo "=== Lancement des tests SIT213 - Etape 1, 2 & 3 ==="
 echo "========================================="
 echo "1. Lancement de la suite de tests Java"
 echo "========================================="
@@ -71,6 +72,22 @@ run_test_erreur() {
     fi
 }
 
+run_test_teb_valide() {
+    NB_TESTS=$((NB_TESTS + 1))
+    desc="$1"
+    shift
+    printf "Test %d: %-55s ... " "$NB_TESTS" "$desc"
+    output=$(sh ./simulateur "$@" 2>&1)
+    status=$?
+    if [ $status -eq 0 ] && echo "$output" | grep -q "TEB : [0-9]"; then
+        echo "OK"
+        NB_SUCCES=$((NB_SUCCES + 1))
+    else
+        echo "ECHEC (code=$status, sortie='$output')"
+        NB_ECHECS=$((NB_ECHECS + 1))
+    fi
+}
+
 # 1. Tests nominaux (chaine logique parfaite => TEB attendu = 0.0)
 # --- Tests TP1 : Chaine logique ---
 echo "--- Tests TP1 : Chaine logique ---"
@@ -92,6 +109,16 @@ run_test_succes "Transmission NRZT (-form NRZT -ampl -5.0 5.0)" -form NRZT -ampl
 run_test_succes "Transmission analogique par defaut RZ (-nbEch 45)" -nbEch 45
 run_test_succes "Transmission NRZ avec nbEch=60 et message fixe" -form NRZ -nbEch 60 -mess 0101010101
 
+# --- Tests TP3 : Chaine analogique bruitee ---
+echo ""
+echo "--- Tests TP3 : Chaine analogique bruitee ---"
+run_test_succes "Transmission bruitee fort SNR 30dB (TEB = 0.0)" -form NRZ -snrpb 30
+run_test_succes "Transmission bruitee fort SNR 30dB avec alias -snr" -form NRZ -snr 30
+run_test_teb_valide "Transmission bruitee SNR 5dB (-snrpb 5)" -form NRZ -snrpb 5
+run_test_teb_valide "Transmission bruitee avec germe (-snrpb 0 -seed 42)" -form NRZ -snrpb 0 -seed 42
+run_test_teb_valide "Transmission bruitee RZ (-form RZ -snrpb 10)" -form RZ -snrpb 10
+run_test_teb_valide "Transmission bruitee NRZT (-form NRZT -ampl -5.0 5.0 -snrpb 10)" -form NRZT -ampl -5.0 5.0 -snrpb 10
+
 # --- Tests de robustesse et contraintes ---
 echo ""
 echo "--- Tests de robustesse & rejets d'arguments ---"
@@ -104,6 +131,10 @@ run_test_erreur "Rejet NRZ avec min > 0 (-form NRZ -ampl 1.0 5.0)" -form NRZ -am
 run_test_erreur "Rejet min >= max (-form NRZ -ampl 5.0 1.0)" -form NRZ -ampl 5.0 1.0
 run_test_erreur "Rejet nbEch <= 0 (-nbEch 0)" -nbEch 0
 run_test_erreur "Rejet forme d'onde inconnue (-form TOTO)" -form TOTO
+run_test_erreur "Rejet -snrpb sans valeur (-snrpb)" -snrpb
+run_test_erreur "Rejet -snrpb non numerique (-snrpb abc)" -snrpb abc
+run_test_erreur "Rejet -snr sans valeur (-snr)" -snr
+run_test_erreur "Rejet -snr non numerique (-snr xyz)" -snr xyz
 
 echo ""
 echo "=== Bilan des tests CLI : $NB_SUCCES/$NB_TESTS reussis ($NB_ECHECS echecs) ==="

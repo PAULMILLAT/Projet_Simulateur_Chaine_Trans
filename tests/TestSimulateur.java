@@ -2,7 +2,7 @@
 
 /**
  * Lanceur principal de l'ensemble des tests du simulateur.
- * Exécute successivement les tests du TP1 et du TP2.
+ * Exécute successivement les tests des différentes itérations.
  *
  * @author Paul
  * @author Yann
@@ -25,9 +25,12 @@ public class TestSimulateur {
         boolean succesTP1 = TestTP1.executerTests();
         System.out.println();
         boolean succesTP2 = TestTP2.executerTests();
+        System.out.println();
+        boolean succesTP3 = TestTP3.executerTests();
 
         System.out.println("\n=================================================");
         if (succesTP1 && succesTP2) {
+        if (succesTP1 && succesTP2 && succesTP3) {
             System.out.println("   BILAN GLOBAL : TOUS LES TESTS ONT REUSSI !    ");
             System.out.println("=================================================");
             System.exit(0);

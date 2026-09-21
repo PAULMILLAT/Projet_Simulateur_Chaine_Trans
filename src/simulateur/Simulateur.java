@@ -9,6 +9,8 @@ import sources.SourceFixe;
 import transmetteurs.Emetteur;
 import transmetteurs.Recepteur;
 import transmetteurs.Transmetteur;
+import transmetteurs.TransmetteurBruite;
+import transmetteurs.TransmetteurAnalogiqueBruite;
 import transmetteurs.TransmetteurParfait;
 import visualisations.SondeAnalogique;
 import visualisations.SondeLogique;
@@ -61,6 +63,15 @@ public class Simulateur {
     /** amplitude maximale du signal */
     private float amplMax = 1.0f;
 
+    // --- Paramètres de canal bruité (TP3) ---
+
+    /** indique si la transmission analogique est bruitée (option -snrpb ou -snr 
+     * (-snr est en alias car il est invoqué au dbéut du chapitre options de la commande unique)) */
+    private boolean canalBruite = false;
+
+    /** valeur du rapport signal sur bruit par bit (Eb/N0 en dB) */
+    private Float snrpb = null;
+
     // --- Composants de la chaîne ---
 
     /** le composant Source de la chaîne de transmission */
@@ -109,9 +120,14 @@ public class Simulateur {
         final int nbPixels = 30;
 
         if (transmissionAnalogique) {
-            // --- Chaîne analogique (TP2) ---
+            // --- Chaîne analogique (TP2 et TP3) ---
             emetteur = new Emetteur(formeOnde, nbEch, amplMin, amplMax);
-            transmetteurAnalogique = new TransmetteurParfait<Float>();
+            if (canalBruite) {
+                transmetteurAnalogique = new TransmetteurBruite(snrpb, nbEch, seed);
+                transmetteurAnalogique = new TransmetteurAnalogiqueBruite(snrpb, nbEch, seed);
+            } else {
+                transmetteurAnalogique = new TransmetteurParfait<Float>();
+            }
             recepteur = new Recepteur(formeOnde, nbEch, amplMin, amplMax);
 
             // Connexion des sondes si demandé (-s)
@@ -229,6 +245,19 @@ public class Simulateur {
                 }
                 if (amplMin >= amplMax) {
                     throw new ArgumentsException("Valeurs du parametre -ampl invalides : min doit etre strictement inferieur a max (" + amplMin + " >= " + amplMax + ")");
+                }
+            } else if (args[i].matches("-snrpb") || args[i].matches("-snr")) {
+                transmissionAnalogique = true;
+                canalBruite = true;
+                String opt = args[i];
+                i++;
+                if (i >= args.length) {
+                    throw new ArgumentsException("Valeur manquante pour le parametre " + opt);
+                }
+                try {
+                    snrpb = Float.parseFloat(args[i]);
+                } catch (NumberFormatException e) {
+                    throw new ArgumentsException("Valeur du parametre " + opt + " invalide : " + args[i]);
                 }
             } else {
                 throw new ArgumentsException("Option invalide :" + args[i]);
@@ -350,6 +379,22 @@ public class Simulateur {
      */
     public boolean isTransmissionAnalogique() {
         return this.transmissionAnalogique;
+    }
+
+    /**
+     * Indique si la chaîne utilise un canal bruité.
+     * @return true si le canal est bruité, false sinon
+     */
+    public boolean isCanalBruite() {
+        return this.canalBruite;
+    }
+
+    /**
+     * Renvoie la valeur de snrpb (Eb/N0 en dB).
+     * @return snrpb ou null si non bruité
+     */
+    public Float getSnrpb() {
+        return this.snrpb;
     }
 
     /**
