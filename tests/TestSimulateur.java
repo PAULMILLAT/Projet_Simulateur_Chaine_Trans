@@ -29,7 +29,6 @@ public class TestSimulateur {
         boolean succesTP3 = TestTP3.executerTests();
 
         System.out.println("\n=================================================");
-        if (succesTP1 && succesTP2) {
         if (succesTP1 && succesTP2 && succesTP3) {
             System.out.println("   BILAN GLOBAL : TOUS LES TESTS ONT REUSSI !    ");
             System.out.println("=================================================");
