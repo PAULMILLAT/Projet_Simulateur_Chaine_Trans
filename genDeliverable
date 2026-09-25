@@ -2,6 +2,6 @@
 # @author Yann, Paul
 
 . ./cleanAll
-echo "Generating project deliverable : B3.Millat.Plougonven--Lastennet.Cecotti.Jacq.logiciel.etapeX.tar.gz"
-tar -czf B3.Millat.Plougonven--Lastennet.Cecotti.Jacq.logiciel.etapeX.tar.gz src bin lib docs tests simulateur compile runTests genDoc cleanAll ai_prompts.md README.md 
+echo "Generating project deliverable : B3.Cecotti.Jacq.Millat.Plougonven--Lastennet.logiciel.etapeX.tar.gz"
+tar -czf B3.Cecotti.Jacq.Millat.Plougonven--Lastennet.logiciel.etapeX.tar.gz src bin lib docs tests simulateur compile runTests genDoc cleanAll ai_prompts.md README.md 
 echo "Done !"
