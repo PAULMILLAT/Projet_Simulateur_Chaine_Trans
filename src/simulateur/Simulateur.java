@@ -7,12 +7,16 @@ import sources.Source;
 import sources.SourceAleatoire;
 import sources.SourceFixe;
 import transmetteurs.Emetteur;
+import transmetteurs.InsertionEntete;
 import transmetteurs.Recepteur;
+import transmetteurs.RecepteurSonde;
 import transmetteurs.Transmetteur;
 import transmetteurs.TransmetteurAnalogiqueBruite;
+import transmetteurs.TransmetteurAnalogiqueTrajetsMultiples;
 import transmetteurs.TransmetteurParfait;
 import visualisations.SondeAnalogique;
 import visualisations.SondeLogique;
+import visualisations.SondeOeil;
 
 
 /** La classe Simulateur permet de construire et simuler une chaîne de
@@ -26,6 +30,11 @@ import visualisations.SondeLogique;
  * @author Enzo
  */
 public class Simulateur {
+
+    /** liste des options reconnues par la commande unique, utilisee pour detecter
+     * la fin de la liste de couples (dt, ar) qui suit -ti */
+    private static final java.util.Set<String> OPTIONS_CONNUES = new java.util.HashSet<String>(
+        java.util.Arrays.asList("-s", "-seed", "-mess", "-form", "-nbEch", "-ampl", "-snrpb", "-snr", "-ti", "-oeil"));
 
     /** indique si le Simulateur utilise des sondes d'affichage */
     private boolean affichage = false;
@@ -70,6 +79,36 @@ public class Simulateur {
 
     /** valeur du rapport signal sur bruit par bit (Eb/N0 en dB) */
     private Float snrpb = null;
+
+    // --- Paramètres de canal à trajets indirects (-ti) ---
+
+    /** indique si le canal analogique comporte des trajets indirects (option -ti) */
+    private boolean trajetsMultiples = false;
+
+    /** nombre de trajets indirects (5 au maximum), en plus du trajet direct implicite */
+    private int nbTrajets = 0;
+
+    /** décalages temporels de chaque trajet indirect, en nombre d'échantillons, taille nbTrajets */
+    private int[] decalagesTrajets = new int[0];
+
+    /** amplitudes relatives de chaque trajet indirect par rapport au trajet direct, taille nbTrajets */
+    private float[] amplitudesTrajets = new float[0];
+
+    // --- Diagramme de l'oeil ---
+
+    /** indique si le diagramme de l'oeil doit être affiché (option -oeil) */
+    private boolean diagrammeOeil = false;
+
+    // --- Sondage de canal et égalisation ---
+
+    /** indique si le sondage de canal (en-tête + égaliseur) est actif (option -sondage) */
+    private boolean sondage = false;
+
+    /** le composant d'insertion de l'en-tête de sondage, en émission */
+    private InsertionEntete inserteurEntete = null;
+
+    /** le composant Récepteur adapté (sondage + égalisation), utilisé à la place de recepteur si -sondage */
+    private RecepteurSonde recepteurSonde = null;
 
     // --- Composants de la chaîne ---
 
@@ -121,7 +160,13 @@ public class Simulateur {
         if (transmissionAnalogique) {
             // --- Chaîne analogique (TP2 et TP3) ---
             emetteur = new Emetteur(formeOnde, nbEch, amplMin, amplMax);
-            if (canalBruite) {
+            if (trajetsMultiples) {
+                // snrpb reste null (transmission non bruitee) si -snrpb/-snr n'a pas ete fourni,
+                // conformement au comportement par defaut de -snrpb.
+                Float snrpbEffectif = canalBruite ? snrpb : null;
+                transmetteurAnalogique = new TransmetteurAnalogiqueTrajetsMultiples(
+                    snrpbEffectif, nbEch, nbTrajets, decalagesTrajets, amplitudesTrajets, seed);
+            } else if (canalBruite) {
                 transmetteurAnalogique = new TransmetteurAnalogiqueBruite(snrpb, nbEch, seed);
             } else {
                 transmetteurAnalogique = new TransmetteurParfait<Float>();
@@ -134,6 +179,12 @@ public class Simulateur {
                 emetteur.connecter(new SondeAnalogique("Emetteur"));
                 transmetteurAnalogique.connecter(new SondeAnalogique("Transmetteur"));
                 recepteur.connecter(new SondeLogique("Recepteur", nbPixels));
+            }
+
+            // Connexion de la sonde diagramme de l'oeil (-oeil), indépendante de -s :
+            // observe le signal en sortie du canal, juste avant démodulation.
+            if (diagrammeOeil) {
+                transmetteurAnalogique.connecter(new SondeOeil("Diagramme de l'oeil", nbEch));
             }
 
             // Connexion de la chaîne analogique
@@ -257,6 +308,50 @@ public class Simulateur {
                 } catch (NumberFormatException e) {
                     throw new ArgumentsException("Valeur du parametre " + opt + " invalide : " + args[i]);
                 }
+            } else if (args[i].matches("-ti")) {
+                transmissionAnalogique = true;
+                trajetsMultiples = true;
+                java.util.List<Integer> decalagesList = new java.util.ArrayList<Integer>();
+                java.util.List<Float> amplitudesList = new java.util.ArrayList<Float>();
+                // On consomme des couples (dt, ar) tant que le token suivant n'est
+                // pas l'une des options connues de la commande unique (permet des
+                // valeurs negatives pour dt/ar sans les confondre avec une option).
+                while (i + 1 < args.length && !OPTIONS_CONNUES.contains(args[i + 1])) {
+                    if (decalagesList.size() >= 5) {
+                        throw new ArgumentsException("Au maximum 5 trajets indirects sont autorises pour -ti");
+                    }
+                    int dt;
+                    try {
+                        dt = Integer.parseInt(args[i + 1]);
+                    } catch (NumberFormatException e) {
+                        throw new ArgumentsException("Valeur dt du parametre -ti invalide : " + args[i + 1]);
+                    }
+                    if (i + 2 >= args.length || OPTIONS_CONNUES.contains(args[i + 2])) {
+                        throw new ArgumentsException("Parametre ar manquant pour un trajet indirect de -ti");
+                    }
+                    float ar;
+                    try {
+                        ar = Float.parseFloat(args[i + 2]);
+                    } catch (NumberFormatException e) {
+                        throw new ArgumentsException("Valeur ar du parametre -ti invalide : " + args[i + 2]);
+                    }
+                    decalagesList.add(dt);
+                    amplitudesList.add(ar);
+                    i += 2;
+                }
+                if (decalagesList.isEmpty()) {
+                    throw new ArgumentsException("Au moins un couple (dt ar) est attendu pour -ti");
+                }
+                nbTrajets = decalagesList.size();
+                decalagesTrajets = new int[nbTrajets];
+                amplitudesTrajets = new float[nbTrajets];
+                for (int k = 0; k < nbTrajets; k++) {
+                    decalagesTrajets[k] = decalagesList.get(k);
+                    amplitudesTrajets[k] = amplitudesList.get(k);
+                }
+            } else if (args[i].matches("-oeil")) {
+                transmissionAnalogique = true;
+                diagrammeOeil = true;
             } else {
                 throw new ArgumentsException("Option invalide :" + args[i]);
             }
@@ -393,6 +488,30 @@ public class Simulateur {
      */
     public Float getSnrpb() {
         return this.snrpb;
+    }
+
+    /**
+     * Indique si le canal analogique comporte des trajets multiples.
+     * @return true si -ti a été utilisé, false sinon
+     */
+    public boolean isTrajetsMultiples() {
+        return this.trajetsMultiples;
+    }
+
+    /**
+     * Renvoie le nombre de trajets multiples supplémentaires configurés.
+     * @return nbTrajets
+     */
+    public int getNbTrajets() {
+        return this.nbTrajets;
+    }
+
+    /**
+     * Indique si le diagramme de l'oeil doit être affiché.
+     * @return true si -oeil a été utilisé, false sinon
+     */
+    public boolean isDiagrammeOeil() {
+        return this.diagrammeOeil;
     }
 
     /**
