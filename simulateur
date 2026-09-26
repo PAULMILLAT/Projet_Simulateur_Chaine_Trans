@@ -3,4 +3,4 @@
 # Prend en compte les arguments de la ligne de commande et les transmet à la classe Java Simulateur
 # @author Yann
 
-java -cp bin simulateur.Simulateur "$@"
+java -Djava.awt.headless=false -cp bin simulateur.Simulateur "$@"

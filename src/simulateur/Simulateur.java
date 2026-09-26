@@ -34,7 +34,7 @@ public class Simulateur {
     /** liste des options reconnues par la commande unique, utilisee pour detecter
      * la fin de la liste de couples (dt, ar) qui suit -ti */
     private static final java.util.Set<String> OPTIONS_CONNUES = new java.util.HashSet<String>(
-        java.util.Arrays.asList("-s", "-seed", "-mess", "-form", "-nbEch", "-ampl", "-snrpb", "-snr", "-ti", "-oeil"));
+        java.util.Arrays.asList("-s", "-seed", "-mess", "-form", "-nbEch", "-ampl", "-snrpb", "-snr", "-ti", "-oeil", "-sondage"));
 
     /** indique si le Simulateur utilise des sondes d'affichage */
     private boolean affichage = false;
@@ -171,14 +171,12 @@ public class Simulateur {
             } else {
                 transmetteurAnalogique = new TransmetteurParfait<Float>();
             }
-            recepteur = new Recepteur(formeOnde, nbEch, amplMin, amplMax);
 
             // Connexion des sondes si demandé (-s)
             if (affichage) {
                 source.connecter(new SondeLogique("Source", nbPixels));
                 emetteur.connecter(new SondeAnalogique("Emetteur"));
                 transmetteurAnalogique.connecter(new SondeAnalogique("Transmetteur"));
-                recepteur.connecter(new SondeLogique("Recepteur", nbPixels));
             }
 
             // Connexion de la sonde diagramme de l'oeil (-oeil), indépendante de -s :
@@ -187,11 +185,37 @@ public class Simulateur {
                 transmetteurAnalogique.connecter(new SondeOeil("Diagramme de l'oeil", nbEch));
             }
 
-            // Connexion de la chaîne analogique
-            source.connecter(emetteur);
-            emetteur.connecter(transmetteurAnalogique);
-            transmetteurAnalogique.connecter(recepteur);
-            recepteur.connecter(destination);
+            if (sondage) {
+                // --- Chaîne avec sondage de canal + égalisation ---
+                // Source -> InsertionEntete -> Emetteur -> canal -> RecepteurSonde -> Destination.
+                // L'en-tête est ajoutée/retirée en interne : le TEB (calculé sur
+                // source.getInformationEmise() / destination.getInformationRecue())
+                // ne porte donc que sur le message utile, comme sans -sondage.
+                inserteurEntete = new InsertionEntete();
+                recepteurSonde = new RecepteurSonde(formeOnde, nbEch, amplMin, amplMax);
+
+                if (affichage) {
+                    recepteurSonde.connecter(new SondeLogique("Recepteur", nbPixels));
+                }
+
+                source.connecter(inserteurEntete);
+                inserteurEntete.connecter(emetteur);
+                emetteur.connecter(transmetteurAnalogique);
+                transmetteurAnalogique.connecter(recepteurSonde);
+                recepteurSonde.connecter(destination);
+            } else {
+                // --- Chaîne analogique standard (TP2/TP3/-ti sans sondage) ---
+                recepteur = new Recepteur(formeOnde, nbEch, amplMin, amplMax);
+
+                if (affichage) {
+                    recepteur.connecter(new SondeLogique("Recepteur", nbPixels));
+                }
+
+                source.connecter(emetteur);
+                emetteur.connecter(transmetteurAnalogique);
+                transmetteurAnalogique.connecter(recepteur);
+                recepteur.connecter(destination);
+            }
 
         } else {
             // --- Chaîne logique (TP1) ---
@@ -352,6 +376,9 @@ public class Simulateur {
             } else if (args[i].matches("-oeil")) {
                 transmissionAnalogique = true;
                 diagrammeOeil = true;
+            } else if (args[i].matches("-sondage")) {
+                transmissionAnalogique = true;
+                sondage = true;
             } else {
                 throw new ArgumentsException("Option invalide :" + args[i]);
             }
@@ -443,8 +470,8 @@ public class Simulateur {
     }
 
     /**
-     * Renvoie le récepteur de la chaîne analogique.
-     * @return le récepteur (ou null si transmission logique)
+     * Renvoie le récepteur de la chaîne analogique standard.
+     * @return le récepteur (ou null si transmission logique ou si -sondage est actif, cf. {@link #getRecepteurSonde()})
      */
     public Recepteur getRecepteur() {
         return this.recepteur;
@@ -512,6 +539,25 @@ public class Simulateur {
      */
     public boolean isDiagrammeOeil() {
         return this.diagrammeOeil;
+    }
+
+    /**
+     * Indique si le sondage de canal (en-tête + égalisation) est actif.
+     * @return true si -sondage a été utilisé, false sinon
+     */
+    public boolean isSondage() {
+        return this.sondage;
+    }
+
+    /**
+     * Renvoie le récepteur adapté (sondage + égalisation), utilisé à la
+     * place de {@link #getRecepteur()} quand -sondage est actif. Donne
+     * notamment accès aux décalages/amplitudes de trajets indirects
+     * estimés (utile pour le compte-rendu).
+     * @return le récepteur avec sondage, ou null si -sondage n'est pas utilisé
+     */
+    public RecepteurSonde getRecepteurSonde() {
+        return this.recepteurSonde;
     }
 
     /**
