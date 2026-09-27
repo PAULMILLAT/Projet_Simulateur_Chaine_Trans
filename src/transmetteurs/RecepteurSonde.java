@@ -467,16 +467,34 @@ public class RecepteurSonde extends Transmetteur<Float, Boolean> {
                 decalagesTrouves
             );
 
-            this.decalagesEstimes =
-                new int[decalagesTrouves.size()];
-
-            this.amplitudesEstimees =
-                new float[decalagesTrouves.size()];
+            /*
+            * Un candidat peut avoir passe le seuil de correlation (0.20)
+            * puis se retrouver avec un gain quasi nul une fois les moindres
+            * carres resolus conjointement avec les autres trajets (cas
+            * d'un candidat redondant/colineaire avec un trajet deja retenu).
+            * On l'ecarte ici : un gain negligeable fausserait sinon le
+            * decalMax utilise pour retirer le padding de fin de signal.
+            */
+            List<Integer> decalagesRetenus = new ArrayList<>();
+            List<Float> gainsRetenus = new ArrayList<>();
 
             for (int i = 0; i < decalagesTrouves.size(); i++) {
+                if (Math.abs(gains[i]) >= 1e-3f) {
+                    decalagesRetenus.add(decalagesTrouves.get(i));
+                    gainsRetenus.add(gains[i]);
+                }
+            }
 
-                int dt = decalagesTrouves.get(i);
-                float gain = gains[i];
+            this.decalagesEstimes =
+                new int[decalagesRetenus.size()];
+
+            this.amplitudesEstimees =
+                new float[decalagesRetenus.size()];
+
+            for (int i = 0; i < decalagesRetenus.size(); i++) {
+
+                int dt = decalagesRetenus.get(i);
+                float gain = gainsRetenus.get(i);
 
                 this.decalagesEstimes[i] = dt;
                 this.amplitudesEstimees[i] = gain;
