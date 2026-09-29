@@ -70,12 +70,11 @@ public class RecepteurSonde extends Transmetteur<Float, Boolean> {
     /**
      * Seuil de stabilité de l'égaliseur causal : au-delà, l'inversion par
      * récurrence (IIR) diverge au lieu de corriger le signal (cf. javadoc
-     * de {@link #egaliser}). Si un trajet estimé a une amplitude relative
-     * dont la valeur absolue dépasse ce seuil, l'égalisation est
-     * désactivée entièrement pour ne pas dégrader le signal davantage
-     * qu'un récepteur non adapté.
+    * de {@link #egaliser}). Si la somme des valeurs absolues des
+    * amplitudes relatives estimées atteint ce seuil, l'égalisation est
+    * désactivée entièrement pour éviter une inversion instable.
      */
-    private static final float SEUIL_STABILITE = 0.95f;
+    private static final float SEUIL_STABILITE = 0.90f;
 
     /** Décalages (en échantillons) des trajets indirects détectés lors de la dernière réception */
     private int[] decalagesEstimes = new int[0];
@@ -679,33 +678,33 @@ public class RecepteurSonde extends Transmetteur<Float, Boolean> {
      * directEstime[n] = recu[n] - somme_k( amplitudesEstimees[k] * directEstime[n - decalagesEstimes[k]] ),
      * avec directEstime[m] = 0 pour m &lt; 0.
      *
-     * Cette récurrence n'est stable que si chaque |amplitudesEstimees[k]|
-     * &lt; 1 : elle correspond à un filtre à rétroaction (IIR) qui, à
-     * chaque "tour de boucle" (tous les decalagesEstimes[k] échantillons),
-     * multiplie l'erreur résiduelle par amplitudesEstimees[k]. Si un
-     * trajet indirect est aussi fort ou plus fort que le trajet direct
-     * (|ar| &ge; 1, canal "non minimum de phase"), cette inversion diverge
-     * géométriquement au lieu de corriger le signal - dans ce cas,
-     * l'égalisation est désactivée (le signal est renvoyé inchangé),
-     * ce qui reste toujours préférable à une divergence qui détruirait
-     * complètement la démodulation.
+    * Cette récurrence peut devenir instable lorsque les contributions
+    * cumulées des trajets indirects sont trop fortes. On désactive donc
+    * l'égalisation si la somme des valeurs absolues des amplitudes
+    * estimées atteint {@link #SEUIL_STABILITE} ; le signal est alors
+    * renvoyé inchangé.
      *
      * @param recu le signal analogique complet reçu
      * @return une estimation du signal du trajet direct, débarrassé des échos estimés
      *         (ou le signal reçu inchangé si l'inversion serait instable)
      */
     private float[] egaliser(float[] recu) {
+        float sommeAbs = 0.0f;
         for (float ar : this.amplitudesEstimees) {
-            if (Math.abs(ar) >= SEUIL_STABILITE) {
-                // --- DEBUG TEMPORAIRE ---
-                System.out.println("[RecepteurSonde] egalisation DESACTIVEE (|ar|=" + ar + " >= " + SEUIL_STABILITE + ")");
-                // --- FIN DEBUG ---
-                return recu.clone();
-            }
+            sommeAbs += Math.abs(ar);
         }
-        // --- DEBUG TEMPORAIRE ---
-        System.out.println("[RecepteurSonde] egalisation appliquee normalement");
-        // --- FIN DEBUG ---
+
+        if (sommeAbs >= SEUIL_STABILITE) {
+            System.out.println(
+                "[RecepteurSonde] egalisation DESACTIVEE : somme |ar| = "
+                + sommeAbs
+            );
+            return recu.clone();
+        }
+        System.out.println(
+            "[RecepteurSonde] egalisation appliquee : somme |ar| = "
+            + sommeAbs
+        );
 
         float[] directEstime = new float[recu.length];
         for (int n = 0; n < recu.length; n++) {
