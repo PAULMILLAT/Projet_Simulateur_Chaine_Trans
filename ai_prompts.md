@@ -35,6 +35,8 @@ Caused by: java.lang.ClassNotFoundException: tests.TestSimulateur quand j'execut
     * L'objectif des tests bash (déjà générés par IA pour le TP1) est de compléter les tests java par des tests plus rapides à exécuter et facilitant le test des options choisies lors de l'exécution du script simulateur.
 * Agis en tant qu'expert en ingénierie logicielle Java et en télécommunications. Analyse le code source fourni ci-dessous pour vérifier s'il implémente correctement et intégralement les exigences de l'**Étape 2** du projet de simulation de chaîne de transmission (SIT 213, IMT Atlantique).
     * Pour confirmer le code j'ai (Enzo) utilisé Mistral Vibe car je préfère les IA avec des droits aux données plus strictes.
+* Voici un rapport en LaTeX. Je veux que tu fasse la liste des fautes d'orthographe et de syntaxe des TP1 et TP2 (uniquement).
+    * Gemini a été utile pour corriger les dernières fautes que nous n'avions pas vu. On lui demande de faire la liste des erreurs et non pas de corriger directement, afin de pouvoir vérifier ce qu'il est pertinent de corriger ou non.
 
 ## Prompts du TP3
 * Pourquoi mes fichiers de test refusent d'apartenir au package test.
@@ -45,4 +47,7 @@ Caused by: java.lang.ClassNotFoundException: tests.TestSimulateur quand j'execut
     * L'objectif des tests bash (déjà générés par IA pour le TP1) est de compléter les tests java par des tests plus rapides à exécuter et facilitant le test des options choisies lors de l'exécution du script simulateur.
 * Lis toute la javadoc que nous avons rédigé et dis moi où il y a des erreurs. Fais des recommandations pour améliorer sa lisibilité.
     * Gemini ne nous a pas fait beaucoup de recommandations très importantes donc nous avons peu modifié la javadoc en conséquence. Néanmoins, nous avons suivi certains de ses conseils en harmonisant notre javadoc en ne mettant qu'un auteur par ligne "@author", ainsi qu'en corrigeant des erreurs de syntaxes et de mise en forme.
+* Fais la liste des erreurs que tu trouve dans ce rapport.
+    * Gemini nous a aidé à corriger les fautes d'orthographe et de syntaxe de notre rapport.
 
+## Prompts du TP4
