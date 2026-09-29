@@ -37,36 +37,16 @@ echo "2. Lancement des tests JUnit (trajets multiples / sondage)"
 echo "========================================="
 
 JUNIT_JAR=$(ls lib/junit-platform-console-standalone*.jar 2>/dev/null | head -n 1)
-JUNIT_SRC_DIR="tests"
-JUNIT_BIN_DIR="bin-test"
-
-# Fichiers JUnit 5 uniquement : le reste de tests/ (TestSimulateur,
-# TestTP1/2/3, TestDestination, TestProjetJUnit...) est le framework de
-# tests "maison" de Yann, deja gere par l'etape 1 ci-dessus.
-JUNIT_FILES="
-$JUNIT_SRC_DIR/TransmetteurAnalogiqueTrajetsMultiplesTest.java
-$JUNIT_SRC_DIR/RecepteurSondeTest.java
-$JUNIT_SRC_DIR/SimulateurTrajetsMultiplesTest.java
-"
-
 if [ -z "$JUNIT_JAR" ]; then
     echo "JUnit introuvable (aucun lib/junit-platform-console-standalone*.jar) : tests JUnit ignores."
     echo "-> A telecharger (org.junit.platform:junit-platform-console-standalone"
     echo "   sur Maven Central) et a placer dans lib/ pour activer cette etape."
 else
-    mkdir -p "$JUNIT_BIN_DIR"
-    javac -encoding UTF-8 -cp "bin:$JUNIT_JAR" -d "$JUNIT_BIN_DIR" $JUNIT_FILES
-    if [ $? -ne 0 ]; then
-        echo "Echec de compilation des tests JUnit !"
-        exit 1
-    fi
-
-    # NB : depuis JUnit Platform 6, le ConsoleLauncher exige la
-    # sous-commande "execute" avant les options (ce n'etait pas le cas
-    # en 1.x). Si vous revenez un jour a un jar 1.x, retirez "execute".
+    # Les classes ont deja ete compilees dans bin/ par le script compile.
+    # Le ConsoleLauncher scanne bin/ et execute tous les tests JUnit.
     java -jar "$JUNIT_JAR" execute \
-        --class-path "bin:$JUNIT_BIN_DIR" \
-        --scan-class-path "$JUNIT_BIN_DIR" \
+        --class-path "bin" \
+        --scan-class-path "bin" \
         --disable-banner
     STATUT_JUNIT=$?
 
@@ -164,6 +144,14 @@ run_test_teb_valide "Transmission bruitee avec germe (-snrpb 0 -seed 42)" -form 
 run_test_teb_valide "Transmission bruitee RZ (-form RZ -snrpb 10)" -form RZ -snrpb 10
 run_test_teb_valide "Transmission bruitee NRZT (-form NRZT -ampl -5.0 5.0 -snrpb 10)" -form NRZT -ampl -5.0 5.0 -snrpb 10
 
+# --- Tests TP4 : Chaine analogique multi-trajets (-ti) ---
+echo ""
+echo "--- Tests TP4 : Chaine analogique multi-trajets (-ti) ---"
+run_test_teb_valide "Transmission multi-trajets 1 trajet (-ti 30 0.5)" -ti 30 0.5
+run_test_teb_valide "Transmission multi-trajets 2 trajets (-ti 30 0.4 60 -0.2)" -ti 30 0.4 60 -0.2
+run_test_teb_valide "Transmission multi-trajets bruitee (-ti 30 0.3 -snrpb 10)" -ti 30 0.3 -snrpb 10
+run_test_succes "Transmission multi-trajets avec sondage (-ti 60 0.5 -sondage)" -mess 3000 -form RZ -nbEch 30 -ti 60 0.5 -sondage
+
 # --- Tests de robustesse et contraintes ---
 echo ""
 echo "--- Tests de robustesse & rejets d'arguments ---"
@@ -180,6 +168,12 @@ run_test_erreur "Rejet -snrpb sans valeur (-snrpb)" -snrpb
 run_test_erreur "Rejet -snrpb non numerique (-snrpb abc)" -snrpb abc
 run_test_erreur "Rejet -snr sans valeur (-snr)" -snr
 run_test_erreur "Rejet -snr non numerique (-snr xyz)" -snr xyz
+run_test_erreur "Rejet -ti sans parametre (-ti)" -ti
+run_test_erreur "Rejet -ti couple incomplet (-ti 10)" -ti 10
+run_test_erreur "Rejet -ti dt non entier (-ti abc 0.5)" -ti abc 0.5
+run_test_erreur "Rejet -ti ar non flottant (-ti 10 xyz)" -ti 10 xyz
+run_test_erreur "Rejet -ti plus de 5 trajets" -ti 10 0.1 20 0.1 30 0.1 40 0.1 50 0.1 60 0.1
+run_test_erreur "Rejet -ti dt negatif (-ti -10 0.5)" -ti -10 0.5
 
 echo ""
 echo "=== Bilan des tests CLI : $NB_SUCCES/$NB_TESTS reussis ($NB_ECHECS echecs) ==="

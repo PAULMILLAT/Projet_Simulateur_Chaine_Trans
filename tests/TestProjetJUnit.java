@@ -22,4 +22,9 @@ public class TestProjetJUnit {
     public void testTP3() {
         assertTrue(TestTP3.executerTests(), "Les tests du TP3 doivent tous réussir.");
     }
+
+    @Test
+    public void testTP4() {
+        assertTrue(TestTP4.executerTests(), "Les tests du TP4 doivent tous réussir.");
+    }
 }

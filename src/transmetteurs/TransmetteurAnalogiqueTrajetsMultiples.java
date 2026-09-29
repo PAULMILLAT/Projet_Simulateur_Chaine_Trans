@@ -66,16 +66,21 @@ public class TransmetteurAnalogiqueTrajetsMultiples extends Transmetteur<Float, 
      * @param decalages les décalages (en nombre d'échantillons) de chaque trajet indirect, taille nbTrajets
      * @param amplitudesRelatives les amplitudes relatives (par rapport au trajet direct) de chaque trajet indirect, taille nbTrajets
      * @param seed la graine pour le générateur aléatoire du bruit (null pour pas de graine)
-     * @throws IllegalArgumentException si nbTrajets &gt; 5 ou si les tableaux ne sont pas de taille nbTrajets
+     * @throws IllegalArgumentException si nbTrajets &lt; 0 ou &gt; 5, si un décalage est négatif, ou si les tableaux ne sont pas de taille nbTrajets
      */
     public TransmetteurAnalogiqueTrajetsMultiples(Float snrpb, int nbEch, int nbTrajets,
             int[] decalages, float[] amplitudesRelatives, Integer seed) {
         super();
-        if (nbTrajets > 5) {
-            throw new IllegalArgumentException("Au maximum 5 trajets indirects sont autorises (recu : " + nbTrajets + ")");
+        if (nbTrajets < 0 || nbTrajets > 5) {
+            throw new IllegalArgumentException("Le nombre de trajets indirects doit etre compris entre 0 et 5 (recu : " + nbTrajets + ")");
         }
         if (decalages.length != nbTrajets || amplitudesRelatives.length != nbTrajets) {
             throw new IllegalArgumentException("Les tableaux decalages/amplitudesRelatives ne correspondent pas a nbTrajets");
+        }
+        for (int d : decalages) {
+            if (d < 0) {
+                throw new IllegalArgumentException("Les decalages doivent etre positifs ou nuls (recu : " + d + ")");
+            }
         }
         this.snrpb = snrpb;
         this.nbEch = nbEch;
@@ -210,11 +215,11 @@ public class TransmetteurAnalogiqueTrajetsMultiples extends Transmetteur<Float, 
 
     public int getNbTrajets() { return this.nbTrajets; }
 
-    /** @return les decalages (en nombre d'echantillons) de chaque trajet indirect */
-    public int[] getDecalages() { return this.decalages; }
+    /** @return une copie des decalages (en nombre d'echantillons) de chaque trajet indirect */
+    public int[] getDecalages() { return this.decalages.clone(); }
 
-    /** @return les amplitudes relatives de chaque trajet indirect (par rapport au trajet direct) */
-    public float[] getAmplitudesRelatives() { return this.amplitudesRelatives; }
+    /** @return une copie des amplitudes relatives de chaque trajet indirect (par rapport au trajet direct) */
+    public float[] getAmplitudesRelatives() { return this.amplitudesRelatives.clone(); }
 
     /** @return true si la transmission est bruitee (snrpb != null) */
     public boolean isBruite() { return this.bruiteur != null; }

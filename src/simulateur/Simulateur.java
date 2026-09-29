@@ -355,6 +355,9 @@ public class Simulateur {
                     } catch (NumberFormatException e) {
                         throw new ArgumentsException("Valeur dt du parametre -ti invalide : " + args[i + 1]);
                     }
+                    if (dt < 0) {
+                        throw new ArgumentsException("Valeur dt du parametre -ti invalide (doit etre >= 0) : " + args[i + 1]);
+                    }
                     if (i + 2 >= args.length || OPTIONS_CONNUES.contains(args[i + 2])) {
                         throw new ArgumentsException("Parametre ar manquant pour un trajet indirect de -ti");
                     }
