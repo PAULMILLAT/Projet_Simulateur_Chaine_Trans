@@ -1,11 +1,8 @@
-package transmetteurs;
-
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
-
 import information.Information;
-
+import information.InformationNonConformeException;
+import transmetteurs.TransmetteurAnalogiqueTrajetsMultiples;
 /**
  * Tests unitaires pour {@link TransmetteurAnalogiqueTrajetsMultiples}.
  *
@@ -13,7 +10,7 @@ import information.Information;
  * correcte des trajets indirects (décalage + amplitude relative),
  * longueur du signal composite, et transmission non bruitée par défaut.
  */
-class TransmetteurAnalogiqueTrajetsMultiplesTest {
+public class TransmetteurAnalogiqueTrajetsMultiplesTest {
 
     private static final int NB_ECH = 30;
 

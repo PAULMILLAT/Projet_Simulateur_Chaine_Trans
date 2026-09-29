@@ -1,5 +1,3 @@
-package transmetteurs;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
@@ -8,6 +6,10 @@ import destinations.DestinationFinale;
 import information.Information;
 import sources.SourceAleatoire;
 import sources.SourceFixe;
+import transmetteurs.Emetteur;
+import transmetteurs.InsertionEntete;
+import transmetteurs.RecepteurSonde;
+import transmetteurs.TransmetteurAnalogiqueTrajetsMultiples;
 
 /**
  * Tests d'intégration de la chaîne avec sondage :
@@ -20,7 +22,7 @@ import sources.SourceFixe;
  * garde-fou de stabilité ne fait pas planter le récepteur sur un canal
  * non minimum de phase.
  */
-class RecepteurSondeTest {
+public class RecepteurSondeTest {
 
     private static final int NB_ECH = 30;
     private static final String FORME_ONDE = "RZ";

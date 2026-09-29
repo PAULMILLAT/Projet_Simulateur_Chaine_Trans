@@ -1,4 +1,4 @@
-package simulateur;
+/* package simulateur; */
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Assumptions;
 
 import java.awt.GraphicsEnvironment;
 
+import simulateur.ArgumentsException;
+import simulateur.Simulateur;
 import transmetteurs.TransmetteurAnalogiqueTrajetsMultiples;
 
 /**
@@ -17,7 +19,7 @@ import transmetteurs.TransmetteurAnalogiqueTrajetsMultiples;
  * mode "sondage" sur un canal parfait sans -sondage, pour des messages
  * RZ suffisamment longs).
  */
-class SimulateurTrajetsMultiplesTest {
+public class SimulateurTrajetsMultiplesTest {
 
     @Test
     void argumentTiRejettePlusDeCinqTrajets() {
