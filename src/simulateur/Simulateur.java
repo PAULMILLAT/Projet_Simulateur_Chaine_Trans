@@ -194,6 +194,11 @@ public class Simulateur {
                 inserteurEntete = new InsertionEntete();
                 recepteurSonde = new RecepteurSonde(formeOnde, nbEch, amplMin, amplMax);
 
+                if (diagrammeOeil) {
+                    recepteurSonde.setSondeOeilApresEgalisation(
+                        new SondeOeil("Diagramme de l'oeil après égalisation", nbEch));
+                }
+
                 if (affichage) {
                     recepteurSonde.connecter(new SondeLogique("Recepteur", nbPixels));
                 }

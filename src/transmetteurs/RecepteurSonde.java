@@ -6,6 +6,7 @@ import java.util.List;
 import destinations.DestinationInterface;
 import information.Information;
 import information.InformationNonConformeException;
+import visualisations.SondeOeil;
 
 /**
  * Récepteur adapté au canal à trajets indirects, utilisant le sondage par
@@ -82,6 +83,9 @@ public class RecepteurSonde extends Transmetteur<Float, Boolean> {
     /** Amplitudes relatives des trajets indirects détectés lors de la dernière réception */
     private float[] amplitudesEstimees = new float[0];
 
+    /** Sonde optionnelle du signal analogique après égalisation */
+    private SondeOeil sondeOeilApresEgalisation;
+
     /**
      * Constructeur par défaut : forme RZ, 30 échantillons par bit,
      * amplMin = 0.0f, amplMax = 1.0f.
@@ -104,6 +108,15 @@ public class RecepteurSonde extends Transmetteur<Float, Boolean> {
         this.nbEch = nbEch;
         this.amplMin = amplMin;
         this.amplMax = amplMax;
+    }
+
+    /**
+     * Configure une sonde optionnelle pour visualiser le signal égalisé.
+     *
+     * @param sonde la sonde du diagramme de l'oeil, ou null pour la désactiver
+     */
+    public void setSondeOeilApresEgalisation(SondeOeil sonde) {
+        this.sondeOeilApresEgalisation = sonde;
     }
 
     /**
@@ -155,6 +168,16 @@ public class RecepteurSonde extends Transmetteur<Float, Boolean> {
         // 3. Egalisation : inversion causale du canal estime, appliquee a
         // l'ensemble du signal recu (en-tete + message)
         float[] directEstime = egaliser(recu);
+
+        // La sonde connectée au canal montre le signal avant égalisation ;
+        // celle-ci observe le même signal après correction des trajets.
+        if (this.sondeOeilApresEgalisation != null) {
+            Information<Float> informationEgalisee = new Information<Float>();
+            for (float echantillon : directEstime) {
+                informationEgalisee.add(echantillon);
+            }
+            this.sondeOeilApresEgalisation.recevoir(informationEgalisee);
+        }
 
         // 4. Retrait du padding du aux trajets retardes : la longueur utile
         // du signal egalise correspond a la longueur reellement emise
