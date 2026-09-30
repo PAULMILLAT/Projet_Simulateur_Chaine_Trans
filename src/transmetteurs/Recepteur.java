@@ -5,11 +5,20 @@ import information.Information;
 import information.InformationNonConformeException;
 
 /**
- * Classe représentant le composant Récepteur de la chaîne de transmission.
+ * Récepteur : convertit un signal analogique échantillonné
+ * (Information<Float>) en une séquence de bits (Information<Boolean>).
  *
- * Le récepteur convertit un signal analogique échantillonné
- * (Information<Float>) en une séquence de bits logiques
- * (Information<Boolean>).
+ * Ce récepteur suppose qu'aucun en-tête n'est présent : tous les
+ * échantillons utiles sont traités comme des données.
+ *
+ * La décision se fait en deux temps :
+ *  1. une métrique (moyenne sur la fenêtre de décision) est calculée
+ *     pour chaque bit ;
+ *  2. un seuil adaptatif (2-means) est estimé à partir de ces métriques,
+ *     ce qui compense le décalage de niveaux dû aux trajets multiples.
+ *
+ * Les derniers échantillons (queue du canal, de longueur retardMax)
+ * sont ignorés : ils ne contiennent que des échos et pas de nouveau bit.
  *
  * @author Paul
  * @author Yann
@@ -29,6 +38,19 @@ public class Recepteur extends Transmetteur<Float, Boolean> {
 
     /** Amplitude maximale */
     private float amplMax;
+
+    /** Retard maximal du canal en échantillons (queue à ignorer) */
+    private int retardMax = 0;
+
+    /** Nombre maximal d'itérations de l'algorithme 2-means */
+    private static final int NB_ITERATIONS = 10;
+
+    /**
+     * Écart minimal entre les deux nuages de métriques, en proportion de
+     * (amplMax - amplMin), en dessous duquel on considère qu'il n'y a
+     * qu'un seul niveau présent et on revient au seuil nominal.
+     */
+    private static final float ECART_MIN_RELATIF = 0.25f;
 
     /**
      * Constructeur par défaut : forme RZ, 30 échantillons par bit,
@@ -55,11 +77,17 @@ public class Recepteur extends Transmetteur<Float, Boolean> {
     }
 
     /**
-     * Reçoit le signal échantillonné.
+     * Définit le retard maximal du canal (en échantillons). Les
+     * retardMax derniers échantillons reçus sont ignorés.
      *
-     * Si un en-tête PN est détecté, le canal est estimé à partir de
-     * celui-ci et les trajets multiples sont compensés avant la
-     * démodulation.
+     * @param retardMax le retard maximal (0 si canal sans trajets multiples)
+     */
+    public void setRetardMax(int retardMax) {
+        this.retardMax = Math.max(0, retardMax);
+    }
+
+    /**
+     * Reçoit le signal échantillonné, le démodule et l'émet.
      *
      * @param information le signal analogique reçu
      * @throws InformationNonConformeException si l'information est nulle
@@ -83,66 +111,121 @@ public class Recepteur extends Transmetteur<Float, Boolean> {
             return;
         }
 
-        // Conversion en tableau pour faciliter les calculs
         float[] echantillons = new float[nbEchantillonsTotal];
-
         int idx = 0;
         for (Float f : information) {
             echantillons[idx++] = f;
         }
 
-        recevoirSansSondage(echantillons);
+        // On retire la queue du canal : il ne reste que les échantillons utiles
+        int nbUtiles = Math.max(0, echantillons.length - this.retardMax);
+
+        float[] metriques = calculerMetriques(echantillons, nbUtiles);
+        float seuil = calculerSeuil(metriques);
+
+        for (float m : metriques) {
+            this.informationEmise.add(m > seuil);
+        }
 
         this.emettre();
     }
 
     /**
-     * Traitement normal lorsqu'aucun en-tête de sondage n'est présent.
+     * Calcule, pour chaque bit, la moyenne des échantillons sur la
+     * fenêtre de décision : bit entier pour le NRZ, tiers central
+     * pour le RZ et le NRZT.
+     *
+     * @param echantillons le signal reçu
+     * @param nbUtiles le nombre d'échantillons utiles (hors queue du canal)
      */
-    private void recevoirSansSondage(float[] echantillons) {
+    private float[] calculerMetriques(float[] echantillons, int nbUtiles) {
 
-        int nbEchantillonsTotal = echantillons.length;
+        int nbBits = nbUtiles / this.nbEch;
+        float[] metriques = new float[nbBits];
 
-        int nbBits = nbEchantillonsTotal / this.nbEch;
+        int debutFenetre;
+        int finFenetre;
 
-        float seuil = (this.amplMin + this.amplMax) / 2.0f;
+        if ("NRZ".equalsIgnoreCase(this.formeOnde)) {
+            debutFenetre = 0;
+            finFenetre = this.nbEch;
+        } else {
+            debutFenetre = this.nbEch / 3;
+            finFenetre = 2 * this.nbEch / 3;
+            if (finFenetre <= debutFenetre) { // nbEch très petit
+                debutFenetre = 0;
+                finFenetre = this.nbEch;
+            }
+        }
 
-        int tiers1 = this.nbEch / 3;
-        int tiers2 = 2 * this.nbEch / 3;
+        int tailleFenetre = finFenetre - debutFenetre;
 
         for (int k = 0; k < nbBits; k++) {
-
             int debutBit = k * this.nbEch;
-
             float somme = 0.0f;
-            int nbEchPris = 0;
+            for (int i = debutFenetre; i < finFenetre; i++) {
+                somme += echantillons[debutBit + i];
+            }
+            metriques[k] = somme / tailleFenetre;
+        }
 
-            if ("NRZ".equalsIgnoreCase(this.formeOnde)) {
+        return metriques;
+    }
 
-                // NRZ : moyenne sur tout le bit
-                for (int i = 0; i < this.nbEch; i++) {
-                    somme += echantillons[debutBit + i];
-                    nbEchPris++;
-                }
+    /**
+     * Estime le seuil de décision par un 2-means à une dimension.
+     * Repli sur le seuil nominal si les métriques ne forment pas deux
+     * nuages distincts (par exemple message ne contenant qu'un seul
+     * type de bit).
+     */
+    private float calculerSeuil(float[] metriques) {
 
-            } else {
+        float seuilNominal = (this.amplMin + this.amplMax) / 2.0f;
 
-                // RZ / NRZT : moyenne sur le plateau central
-                for (int i = tiers1; i < tiers2; i++) {
-                    somme += echantillons[debutBit + i];
-                    nbEchPris++;
+        if (metriques.length == 0) {
+            return seuilNominal;
+        }
+
+        float min = metriques[0];
+        float max = metriques[0];
+        for (float m : metriques) {
+            if (m < min) min = m;
+            if (m > max) max = m;
+        }
+
+        if (max - min < ECART_MIN_RELATIF * (this.amplMax - this.amplMin)) {
+            return seuilNominal;
+        }
+
+        float seuil = (min + max) / 2.0f;
+
+        for (int it = 0; it < NB_ITERATIONS; it++) {
+            float somme0 = 0.0f, somme1 = 0.0f;
+            int n0 = 0, n1 = 0;
+
+            for (float m : metriques) {
+                if (m > seuil) {
+                    somme1 += m;
+                    n1++;
+                } else {
+                    somme0 += m;
+                    n0++;
                 }
             }
 
-            float moyenne =
-                    (nbEchPris > 0)
-                    ? somme / nbEchPris
-                    : 0.0f;
+            if (n0 == 0 || n1 == 0) {
+                break;
+            }
 
-            boolean bitDecide = moyenne > seuil;
-
-            this.informationEmise.add(bitDecide);
+            float nouveauSeuil = (somme0 / n0 + somme1 / n1) / 2.0f;
+            if (Math.abs(nouveauSeuil - seuil) < 1e-6f) {
+                seuil = nouveauSeuil;
+                break;
+            }
+            seuil = nouveauSeuil;
         }
+
+        return seuil;
     }
 
     /**
@@ -156,7 +239,6 @@ public class Recepteur extends Transmetteur<Float, Boolean> {
 
         for (DestinationInterface<Boolean> destination
                 : this.destinationsConnectees) {
-
             destination.recevoir(this.informationEmise);
         }
     }

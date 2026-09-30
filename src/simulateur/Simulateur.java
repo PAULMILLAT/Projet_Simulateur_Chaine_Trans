@@ -211,6 +211,7 @@ public class Simulateur {
             } else {
                 // --- Chaîne analogique standard (TP2/TP3/-ti sans sondage) ---
                 recepteur = new Recepteur(formeOnde, nbEch, amplMin, amplMax);
+                recepteur.setRetardMax(retardMaxCanal());
 
                 if (affichage) {
                     recepteur.connecter(new SondeLogique("Recepteur", nbPixels));
@@ -236,6 +237,20 @@ public class Simulateur {
             source.connecter(transmetteurLogique);
             transmetteurLogique.connecter(destination);
         }
+    }
+
+    /**
+     * Renvoie le plus grand décalage (en échantillons) des trajets indirects,
+     * c'est-à-dire la longueur de la queue ajoutée par le canal. Vaut 0 sans -ti.
+     */
+    private int retardMaxCanal() {
+        int max = 0;
+        for (int d : decalagesTrajets) {
+            if (d > max) {
+                max = d;
+            }
+        }
+        return max;
     }
 
     /**
