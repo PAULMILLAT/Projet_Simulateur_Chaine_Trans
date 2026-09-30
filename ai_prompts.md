@@ -56,3 +56,8 @@ Caused by: java.lang.ClassNotFoundException: tests.TestSimulateur quand j'execut
 * Fais la liste des erreurs que tu trouve dans ce rapport.
     * Gemini nous a aidé à corriger les fautes d'orthographe et de syntaxe de notre rapport.
 * Agis en tant qu'expert en ingénierie logicielle Java et en télécommunications. Analyse le code source fourni ci-dessous pour vérifier s'il implémente correctement et intégralement les exigences de l'étape 4 du projet.
+    * L'IA nous a suggéré quelques fonctionalités manquantes que nous avons développées
+
+## Prompts du TP5
+* Agis en tant qu'expert en ingénierie logicielle Java et en télécommunications. Analyse le code source fourni ci-dessous pour vérifier s'il implémente correctement et intégralement les exigences de l'étape 5 du projet.
+    * L'IA nous a suggéré quelques fonctionalités manquantes que nous avons développées
