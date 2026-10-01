@@ -70,5 +70,7 @@ Caused by: java.lang.ClassNotFoundException: tests.TestSimulateur quand j'execut
     * L'IA nous a confirmé que nos résultats étaient bons et cohérents, ce qui a augmenté notre confiance dans les tests qu'on a développés, même si les tests de l'IA ne nous ont pas toujours semblés pertinents. L'objectif de cette requête était de voir si nous avons oublié de vérifier certains résultats.
 * Vérifie que nos tests vérifient suffisement bien notre code
     * L'IA nous a suggéré quelques tests supplémentaires que nous avons implémentés, mais surtout beaucoup de tests peu utiles qui visaient juste à monter artificiellement le coverage des tests sans que cela soit forcément pertinent. Nous avons donc peu suivi cette recommandation de l'IA.
+* Valide la cohérence et les calculs des résultats théoriques que nous avons calculé dans ce chapitre : [copié/collé d'un extrait de notre rapport]
+    * Gemini a validé nos calculs et la cohérence de nos résultats. Il a suggéré quelques améliorations sur la notation utilisée.
 * Vérifie les fautes d'orthographe et de syntaxe dans nos commentaires et dans la javadoc. Fais la liste de tes suggestions de modification
     * Je préfère que l'IA fasse une liste de suggestion plutôt que de nous fournir des commentaires déjà corrigés, afin de pouvoir sélectionner moi même les modifications pertinentes.
