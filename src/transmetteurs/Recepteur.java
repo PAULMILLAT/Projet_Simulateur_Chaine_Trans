@@ -180,50 +180,50 @@ public class Recepteur extends Transmetteur<Float, Boolean> {
      */
     private float calculerSeuil(float[] metriques) {
 
-        float seuilNominal = (this.amplMin + this.amplMax) / 2.0f;
+        float seuil = (this.amplMin + this.amplMax) / 2.0f;
 
-        if (metriques.length == 0) {
-            return seuilNominal;
-        }
+        // if (metriques.length == 0) {
+        //     return seuilNominal;
+        // }
 
-        float min = metriques[0];
-        float max = metriques[0];
-        for (float m : metriques) {
-            if (m < min) min = m;
-            if (m > max) max = m;
-        }
+        // float min = metriques[0];
+        // float max = metriques[0];
+        // for (float m : metriques) {
+        //     if (m < min) min = m;
+        //     if (m > max) max = m;
+        // }
 
-        if (max - min < ECART_MIN_RELATIF * (this.amplMax - this.amplMin)) {
-            return seuilNominal;
-        }
+        // if (max - min < ECART_MIN_RELATIF * (this.amplMax - this.amplMin)) {
+        //     return seuilNominal;
+        // }
 
-        float seuil = (min + max) / 2.0f;
+        // float seuil = (min + max) / 2.0f;
 
-        for (int it = 0; it < NB_ITERATIONS; it++) {
-            float somme0 = 0.0f, somme1 = 0.0f;
-            int n0 = 0, n1 = 0;
+        // for (int it = 0; it < NB_ITERATIONS; it++) {
+        //     float somme0 = 0.0f, somme1 = 0.0f;
+        //     int n0 = 0, n1 = 0;
 
-            for (float m : metriques) {
-                if (m > seuil) {
-                    somme1 += m;
-                    n1++;
-                } else {
-                    somme0 += m;
-                    n0++;
-                }
-            }
+        //     for (float m : metriques) {
+        //         if (m > seuil) {
+        //             somme1 += m;
+        //             n1++;
+        //         } else {
+        //             somme0 += m;
+        //             n0++;
+        //         }
+        //     }
 
-            if (n0 == 0 || n1 == 0) {
-                break;
-            }
+        //     if (n0 == 0 || n1 == 0) {
+        //         break;
+        //     }
 
-            float nouveauSeuil = (somme0 / n0 + somme1 / n1) / 2.0f;
-            if (Math.abs(nouveauSeuil - seuil) < 1e-6f) {
-                seuil = nouveauSeuil;
-                break;
-            }
-            seuil = nouveauSeuil;
-        }
+        //     float nouveauSeuil = (somme0 / n0 + somme1 / n1) / 2.0f;
+        //     if (Math.abs(nouveauSeuil - seuil) < 1e-6f) {
+        //         seuil = nouveauSeuil;
+        //         break;
+        //     }
+        //     seuil = nouveauSeuil;
+        // }
 
         return seuil;
     }
