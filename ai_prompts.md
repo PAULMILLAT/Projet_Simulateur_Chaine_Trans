@@ -65,3 +65,10 @@ Caused by: java.lang.ClassNotFoundException: tests.TestSimulateur quand j'execut
 ## Prompts du TP5
 * Agis en tant qu'expert en ingénierie logicielle Java et en télécommunications. Analyse le code source fourni ci-dessous pour vérifier s'il implémente correctement et intégralement les exigences de l'étape 5 du projet.
     * L'IA nous a suggéré quelques fonctionalités manquantes que nous avons développées
+* Génère un script python pour représenter les courbes de TEB.
+* Vérifie l'efficacité de notre chaine de transmission avec tes propres tests et la cohérence des résultats obtenus (ils doivent en théorie être meilleurs que ceux sans codage canal)
+    * L'IA nous a confirmé que nos résultats étaient bons et cohérents, ce qui a augmenté notre confiance dans les tests qu'on a développés, même si les tests de l'IA ne nous ont pas toujours semblés pertinents. L'objectif de cette requête était de voir si nous avons oublié de vérifier certains résultats.
+* Vérifie que nos tests vérifient suffisement bien notre code
+    * L'IA nous a suggéré quelques tests supplémentaires que nous avons implémentés, mais surtout beaucoup de tests peu utiles qui visaient juste à monter artificiellement le coverage des tests sans que cela soit forcément pertinent. Nous avons donc peu suivi cette recommandation de l'IA.
+* Vérifie les fautes d'orthographe et de syntaxe dans nos commentaires et dans la javadoc. Fais la liste de tes suggestions de modification
+    * Je préfère que l'IA fasse une liste de suggestion plutôt que de nous fournir des commentaires déjà corrigés, afin de pouvoir sélectionner moi même les modifications pertinentes.

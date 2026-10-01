@@ -18,7 +18,7 @@ if [ ! -f bin/tests/TestSimulateur.class ] || [ ! -f bin/simulateur/Simulateur.c
     echo ""
 fi
 
-echo "=== Lancement des tests SIT213 - Etape 1, 2 & 3 ==="
+echo "=== Lancement des tests SIT213 - Etapes 1, 2, 3, 4 & 5 ==="
 echo "========================================="
 echo "1. Lancement de la suite de tests Java"
 echo "========================================="
@@ -151,6 +151,18 @@ run_test_teb_valide "Transmission multi-trajets 1 trajet (-ti 30 0.5)" -ti 30 0.
 run_test_teb_valide "Transmission multi-trajets 2 trajets (-ti 30 0.4 60 -0.2)" -ti 30 0.4 60 -0.2
 run_test_teb_valide "Transmission multi-trajets bruitee (-ti 30 0.3 -snrpb 10)" -ti 30 0.3 -snrpb 10
 run_test_succes "Transmission multi-trajets avec sondage (-ti 60 0.5 -sondage)" -mess 3000 -form RZ -nbEch 30 -ti 60 0.5 -sondage
+
+# --- Tests TP5 : Codage de canal (-codeur) ---
+echo ""
+echo "--- Tests TP5 : Codage de canal (-codeur) ---"
+run_test_succes "Transmission logique avec codage (-codeur)" -codeur
+run_test_succes "Transmission logique message fixe avec codage" -mess 01010101 -codeur
+run_test_succes "Transmission analogique NRZ avec codage" -mess 500 -form NRZ -codeur
+run_test_succes "Transmission analogique RZ avec codage" -mess 500 -form RZ -codeur
+run_test_succes "Transmission analogique NRZT avec codage" -mess 500 -form NRZT -ampl -5.0 5.0 -codeur
+run_test_teb_valide "Transmission bruitee NRZ avec codage (-snrpb 5 -codeur)" -form NRZ -snrpb 5 -codeur
+run_test_teb_valide "Transmission bruitee RZ avec codage (-snrpb 10 -codeur)" -form RZ -snrpb 10 -codeur
+run_test_succes "Transmission multi-trajets sondage et codage (-ti 60 0.5 -sondage -codeur)" -mess 3000 -form RZ -nbEch 30 -ti 60 0.5 -sondage -codeur
 
 # --- Tests de robustesse et contraintes ---
 echo ""

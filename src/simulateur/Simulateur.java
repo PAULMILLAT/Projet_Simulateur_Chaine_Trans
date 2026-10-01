@@ -6,6 +6,8 @@ import information.Information;
 import sources.Source;
 import sources.SourceAleatoire;
 import sources.SourceFixe;
+import transmetteurs.CodeurCanal;
+import transmetteurs.DecodeurCanal;
 import transmetteurs.Emetteur;
 import transmetteurs.InsertionEntete;
 import transmetteurs.Recepteur;
@@ -34,7 +36,7 @@ public class Simulateur {
     /** liste des options reconnues par la commande unique, utilisee pour detecter
      * la fin de la liste de couples (dt, ar) qui suit -ti */
     private static final java.util.Set<String> OPTIONS_CONNUES = new java.util.HashSet<String>(
-        java.util.Arrays.asList("-s", "-seed", "-mess", "-form", "-nbEch", "-ampl", "-snrpb", "-snr", "-ti", "-oeil", "-sondage"));
+        java.util.Arrays.asList("-s", "-seed", "-mess", "-form", "-nbEch", "-ampl", "-snrpb", "-snr", "-ti", "-oeil", "-sondage", "-codeur"));
 
     /** indique si le Simulateur utilise des sondes d'affichage */
     private boolean affichage = false;
@@ -110,6 +112,17 @@ public class Simulateur {
     /** le composant Récepteur adapté (sondage + égalisation), utilisé à la place de recepteur si -sondage */
     private RecepteurSonde recepteurSonde = null;
 
+    // --- Codage de canal (TP5) ---
+
+    /** indique si le codage de canal est actif (option -codeur) */
+    private boolean codeurActif = false;
+
+    /** le composant Codeur de canal (en émission) */
+    private CodeurCanal codeur = null;
+
+    /** le composant Décodeur de canal (en réception) */
+    private DecodeurCanal decodeur = null;
+
     // --- Composants de la chaîne ---
 
     /** le composant Source de la chaîne de transmission */
@@ -155,6 +168,12 @@ public class Simulateur {
         // Instanciation de la destination commune
         destination = new DestinationFinale();
 
+        // Instanciation du codeur et du décodeur si demandé (-codeur)
+        if (codeurActif) {
+            codeur = new CodeurCanal();
+            decodeur = new DecodeurCanal();
+        }
+
         final int nbPixels = 30;
 
         if (transmissionAnalogique) {
@@ -175,6 +194,9 @@ public class Simulateur {
             // Connexion des sondes si demandé (-s)
             if (affichage) {
                 source.connecter(new SondeLogique("Source", nbPixels));
+                if (codeurActif) {
+                    codeur.connecter(new SondeLogique("Codeur", nbPixels));
+                }
                 emetteur.connecter(new SondeAnalogique("Emetteur"));
                 transmetteurAnalogique.connecter(new SondeAnalogique("Transmetteur"));
             }
@@ -187,7 +209,7 @@ public class Simulateur {
 
             if (sondage) {
                 // --- Chaîne avec sondage de canal + égalisation ---
-                // Source -> InsertionEntete -> Emetteur -> canal -> RecepteurSonde -> Destination.
+                // Source -> [Codeur] -> InsertionEntete -> Emetteur -> canal -> RecepteurSonde -> [Decodeur] -> Destination.
                 // L'en-tête est ajoutée/retirée en interne : le TEB (calculé sur
                 // source.getInformationEmise() / destination.getInformationRecue())
                 // ne porte donc que sur le message utile, comme sans -sondage.
@@ -201,13 +223,27 @@ public class Simulateur {
 
                 if (affichage) {
                     recepteurSonde.connecter(new SondeLogique("Recepteur", nbPixels));
+                    if (codeurActif) {
+                        decodeur.connecter(new SondeLogique("Decodeur", nbPixels));
+                    }
                 }
 
-                source.connecter(inserteurEntete);
+                if (codeurActif) {
+                    source.connecter(codeur);
+                    codeur.connecter(inserteurEntete);
+                } else {
+                    source.connecter(inserteurEntete);
+                }
                 inserteurEntete.connecter(emetteur);
                 emetteur.connecter(transmetteurAnalogique);
                 transmetteurAnalogique.connecter(recepteurSonde);
-                recepteurSonde.connecter(destination);
+
+                if (codeurActif) {
+                    recepteurSonde.connecter(decodeur);
+                    decodeur.connecter(destination);
+                } else {
+                    recepteurSonde.connecter(destination);
+                }
             } else {
                 // --- Chaîne analogique standard (TP2/TP3/-ti sans sondage) ---
                 recepteur = new Recepteur(formeOnde, nbEch, amplMin, amplMax);
@@ -215,12 +251,26 @@ public class Simulateur {
 
                 if (affichage) {
                     recepteur.connecter(new SondeLogique("Recepteur", nbPixels));
+                    if (codeurActif) {
+                        decodeur.connecter(new SondeLogique("Decodeur", nbPixels));
+                    }
                 }
 
-                source.connecter(emetteur);
+                if (codeurActif) {
+                    source.connecter(codeur);
+                    codeur.connecter(emetteur);
+                } else {
+                    source.connecter(emetteur);
+                }
                 emetteur.connecter(transmetteurAnalogique);
                 transmetteurAnalogique.connecter(recepteur);
-                recepteur.connecter(destination);
+
+                if (codeurActif) {
+                    recepteur.connecter(decodeur);
+                    decodeur.connecter(destination);
+                } else {
+                    recepteur.connecter(destination);
+                }
             }
 
         } else {
@@ -230,12 +280,25 @@ public class Simulateur {
             // Connexion des sondes logiques si demandé (-s)
             if (affichage) {
                 source.connecter(new SondeLogique("Source", nbPixels));
+                if (codeurActif) {
+                    codeur.connecter(new SondeLogique("Codeur", nbPixels));
+                }
                 transmetteurLogique.connecter(new SondeLogique("Transmetteur", nbPixels));
+                if (codeurActif) {
+                    decodeur.connecter(new SondeLogique("Decodeur", nbPixels));
+                }
             }
 
             // Connexion de la chaîne logique
-            source.connecter(transmetteurLogique);
-            transmetteurLogique.connecter(destination);
+            if (codeurActif) {
+                source.connecter(codeur);
+                codeur.connecter(transmetteurLogique);
+                transmetteurLogique.connecter(decodeur);
+                decodeur.connecter(destination);
+            } else {
+                source.connecter(transmetteurLogique);
+                transmetteurLogique.connecter(destination);
+            }
         }
     }
 
@@ -402,6 +465,8 @@ public class Simulateur {
             } else if (args[i].matches("-sondage")) {
                 transmissionAnalogique = true;
                 sondage = true;
+            } else if (args[i].matches("-codeur")) {
+                codeurActif = true;
             } else {
                 throw new ArgumentsException("Option invalide :" + args[i]);
             }
@@ -581,6 +646,38 @@ public class Simulateur {
      */
     public RecepteurSonde getRecepteurSonde() {
         return this.recepteurSonde;
+    }
+
+    /**
+     * Indique si le codage de canal est actif (option -codeur).
+     * @return true si -codeur a été spécifié, false sinon
+     */
+    public boolean isCodeur() {
+        return this.codeurActif;
+    }
+
+    /**
+     * Indique si le codage de canal est actif (alias de {@link #isCodeur()}).
+     * @return true si -codeur a été spécifié, false sinon
+     */
+    public boolean isCodageCanal() {
+        return this.codeurActif;
+    }
+
+    /**
+     * Renvoie le composant codeur de canal.
+     * @return le codeur (ou null si -codeur n'est pas actif)
+     */
+    public CodeurCanal getCodeur() {
+        return this.codeur;
+    }
+
+    /**
+     * Renvoie le composant décodeur de canal.
+     * @return le décodeur (ou null si -codeur n'est pas actif)
+     */
+    public DecodeurCanal getDecodeur() {
+        return this.decodeur;
     }
 
     /**

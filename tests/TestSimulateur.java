@@ -29,9 +29,11 @@ public class TestSimulateur {
         boolean succesTP3 = TestTP3.executerTests();
         System.out.println();
         boolean succesTP4 = TestTP4.executerTests();
+        System.out.println();
+        boolean succesTP5 = TestTP5.executerTests();
 
         System.out.println("\n=================================================");
-        if (succesTP1 && succesTP2 && succesTP3 && succesTP4) {
+        if (succesTP1 && succesTP2 && succesTP3 && succesTP4 && succesTP5) {
             System.out.println("   BILAN GLOBAL : TOUS LES TESTS ONT REUSSI !    ");
             System.out.println("=================================================");
             System.exit(0);

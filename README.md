@@ -29,5 +29,12 @@ une simulation (à la fois pour le message émis et le bruitage s’il est
 activé). Par défaut le simulateur n’utilise pas de semence pour
 initialiser ses générateurs aléatoires.
 
+`-codeur`
+active l'utilisation d'un codage de canal (codeur en émission et décodeur en réception).
+Le codeur transforme chaque bit en un paquet de 3 bits (0 -> 010, 1 -> 101),
+facilitant la synchronisation (jamais plus de 2 bits consécutifs identiques) et
+permettant au récepteur de détecter et corriger une erreur par paquet de 3 bits.
+Par défaut le simulateur n'utilise pas de codage de canal.
+
 ## Détails techniques
 Ce projet est développé sous Windows, mais livré dans un format compatible avec l'environnement Debian de l'école.
