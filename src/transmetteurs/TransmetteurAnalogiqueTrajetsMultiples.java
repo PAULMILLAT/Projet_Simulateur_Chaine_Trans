@@ -6,12 +6,12 @@ import information.InformationNonConformeException;
 
 /**
  * Classe représentant un transmetteur analogique à trajets indirects
- * (canal à évanouissement / multitrajet), suivi, si demandé, d'un
- * bruit blanc additif gaussien (BBAG) appliqué sur le signal recombiné.
+ * (canal à multitrajet), suivi, si demandé, d'un
+ * bruit blanc additif gaussien appliqué sur le signal recombiné.
  *
- * Conforme à l'option "-ti dt ar [dt ar ...]" de la commande unique :
+ * Avec l'option "-ti dt ar" de la commande unique :
  * le trajet direct est toujours implicite (décalage nul, amplitude
- * relative 1), et chaque trajet indirect k (k = 0..nbTrajets-1, au
+ * relative 1), et chaque trajet indirect k (au
  * maximum 5) est caractérisé par :
  * <ul>
  *   <li>un décalage temporel decalages[k], exprimé directement en
@@ -25,12 +25,9 @@ import information.InformationNonConformeException;
  * le trajet direct seul.
  *
  * Le rapport signal sur bruit par bit snrpb (Eb/N0, en dB) est
- * optionnel (null = transmission non bruitée, comportement par
- * défaut, cohérent avec -snrpb absent). Quand il est fourni, le
+ * optionnel (null = transmission non bruitée. Quand il est fourni, le
  * bruit n'est ajouté qu'une seule fois, sur le signal composite déjà
- * recombiné (délégué à {@link TransmetteurAnalogiqueBruite}) : cela
- * correspond physiquement à un bruit thermique capté au niveau du
- * récepteur, et non à un bruit indépendant par trajet.
+ * recombiné (délégué à {@link TransmetteurAnalogiqueBruite}).
  *
  * @author Damien
  */

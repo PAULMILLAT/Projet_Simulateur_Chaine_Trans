@@ -42,7 +42,7 @@ public class DecodeurCanal extends Transmetteur<Boolean, Boolean> {
     /**
      * Table de vérité déterministe du décodeur pour les 8 triplets possibles.
      * L'indice dans le tableau correspond à la valeur entière du triplet :
-     * {@code (b1 ? 4 : 0) | (b2 ? 2 : 0) | (b3 ? 1 : 0)}.
+     * {@code (bit1 ? 4 : 0) | (bit2 ? 2 : 0) | (bit3 ? 1 : 0)}.
      */
     private static final boolean[] TABLE_DECODAGE = {
         false, // 0: 000 -> 0
@@ -56,8 +56,7 @@ public class DecodeurCanal extends Transmetteur<Boolean, Boolean> {
     };
 
     /**
-     * Position (1-indexée) du bit considéré erroné dans le triplet reçu.
-     * Vaut 0 si le triplet est un mot de code valide sans erreur.
+     * Position du bit considéré erroné dans le triplet reçu.
      */
     private static final int[] POSITION_BIT_ERRONE = {
         2, // 000 -> err sur bit 2 (venait de 010)

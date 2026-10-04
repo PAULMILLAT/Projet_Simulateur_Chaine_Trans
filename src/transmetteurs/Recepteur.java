@@ -6,16 +6,15 @@ import information.InformationNonConformeException;
 
 /**
  * Récepteur : convertit un signal analogique échantillonné
- * (Information<Float>) en une séquence de bits (Information<Boolean>).
+ * "Information<Float>" en une séquence de bits "Information<Boolean>".
  *
  * Ce récepteur suppose qu'aucun en-tête n'est présent : tous les
  * échantillons utiles sont traités comme des données.
  *
  * La décision se fait en deux temps :
- *  1. une métrique (moyenne sur la fenêtre de décision) est calculée
+ *  1. une métrique (moyenne sur le temps d'un bit) est calculée
  *     pour chaque bit ;
- *  2. un seuil adaptatif (2-means) est estimé à partir de ces métriques,
- *     ce qui compense le décalage de niveaux dû aux trajets multiples.
+ *  2. un seuil adaptatif est décidé si NRZ(T) ou RZ.
  *
  * Les derniers échantillons (queue du canal, de longueur retardMax)
  * sont ignorés : ils ne contiennent que des échos et pas de nouveau bit.
@@ -173,57 +172,12 @@ public class Recepteur extends Transmetteur<Float, Boolean> {
     }
 
     /**
-     * Estime le seuil de décision par un 2-means à une dimension.
+     * Estime le seuil entre l'amplitude Min et Max
      * Repli sur le seuil nominal si les métriques ne forment pas deux
-     * nuages distincts (par exemple message ne contenant qu'un seul
-     * type de bit).
      */
     private float calculerSeuil(float[] metriques) {
 
         float seuil = (this.amplMin + this.amplMax) / 2.0f;
-
-        // if (metriques.length == 0) {
-        //     return seuilNominal;
-        // }
-
-        // float min = metriques[0];
-        // float max = metriques[0];
-        // for (float m : metriques) {
-        //     if (m < min) min = m;
-        //     if (m > max) max = m;
-        // }
-
-        // if (max - min < ECART_MIN_RELATIF * (this.amplMax - this.amplMin)) {
-        //     return seuilNominal;
-        // }
-
-        // float seuil = (min + max) / 2.0f;
-
-        // for (int it = 0; it < NB_ITERATIONS; it++) {
-        //     float somme0 = 0.0f, somme1 = 0.0f;
-        //     int n0 = 0, n1 = 0;
-
-        //     for (float m : metriques) {
-        //         if (m > seuil) {
-        //             somme1 += m;
-        //             n1++;
-        //         } else {
-        //             somme0 += m;
-        //             n0++;
-        //         }
-        //     }
-
-        //     if (n0 == 0 || n1 == 0) {
-        //         break;
-        //     }
-
-        //     float nouveauSeuil = (somme0 / n0 + somme1 / n1) / 2.0f;
-        //     if (Math.abs(nouveauSeuil - seuil) < 1e-6f) {
-        //         seuil = nouveauSeuil;
-        //         break;
-        //     }
-        //     seuil = nouveauSeuil;
-        // }
 
         return seuil;
     }

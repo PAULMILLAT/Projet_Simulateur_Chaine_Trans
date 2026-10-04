@@ -7,8 +7,8 @@ import java.util.Random;
 
 /**
  * Classe représentant un transmetteur analogique bruité (canal de transmission non idéal).
- * Ce composant modélise un canal à bruit blanc additif gaussien (BBAG / AWGN)
- * selon la méthode de Box-Muller, en fonction du rapport signal sur bruit par bit (Eb/N0 en dB).
+ * Ce composant modélise un canal à bruit blanc additif gaussien
+ * en fonction du rapport signal sur bruit par bit (Eb/N0 en dB).
  *
  * @author Paul
  * @author Yann

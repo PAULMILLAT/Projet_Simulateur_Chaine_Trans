@@ -76,13 +76,13 @@ public class Simulateur {
     // --- Paramètres de canal bruité (TP3) ---
 
     /** indique si la transmission analogique est bruitée (option -snrpb ou -snr 
-     * (-snr est en alias car il est invoqué au dbéut du chapitre options de la commande unique)) */
+     * (-snr est en alias car il est invoqué au début du chapitre options de la commande unique)) */
     private boolean canalBruite = false;
 
     /** valeur du rapport signal sur bruit par bit (Eb/N0 en dB) */
     private Float snrpb = null;
 
-    // --- Paramètres de canal à trajets indirects (-ti) ---
+    // --- Paramètres de canal à trajets indirects (-ti) (TP4) ---
 
     /** indique si le canal analogique comporte des trajets indirects (option -ti) */
     private boolean trajetsMultiples = false;
@@ -101,7 +101,7 @@ public class Simulateur {
     /** indique si le diagramme de l'oeil doit être affiché (option -oeil) */
     private boolean diagrammeOeil = false;
 
-    // --- Sondage de canal et égalisation ---
+    // --- Sondage de canal et égalisation (petit plus pour récupérer le signal d'origine) ---
 
     /** indique si le sondage de canal (en-tête + égaliseur) est actif (option -sondage) */
     private boolean sondage = false;
@@ -177,11 +177,10 @@ public class Simulateur {
         final int nbPixels = 30;
 
         if (transmissionAnalogique) {
-            // --- Chaîne analogique (TP2 et TP3) ---
+            // --- Chaîne analogique ---
             emetteur = new Emetteur(formeOnde, nbEch, amplMin, amplMax);
             if (trajetsMultiples) {
-                // snrpb reste null (transmission non bruitee) si -snrpb/-snr n'a pas ete fourni,
-                // conformement au comportement par defaut de -snrpb.
+                // snrpb reste null (transmission non bruitee) si -snrpb/-snr n'a pas ete fourni
                 Float snrpbEffectif = canalBruite ? snrpb : null;
                 transmetteurAnalogique = new TransmetteurAnalogiqueTrajetsMultiples(
                     snrpbEffectif, nbEch, nbTrajets, decalagesTrajets, amplitudesTrajets, seed);
@@ -245,7 +244,7 @@ public class Simulateur {
                     recepteurSonde.connecter(destination);
                 }
             } else {
-                // --- Chaîne analogique standard (TP2/TP3/-ti sans sondage) ---
+                // --- Chaîne analogique standard (-ti sans sondage) ---
                 recepteur = new Recepteur(formeOnde, nbEch, amplMin, amplMax);
                 recepteur.setRetardMax(retardMaxCanal());
 
@@ -472,7 +471,7 @@ public class Simulateur {
             }
         }
 
-        // Vérification des contraintes sur les amplitudes (TP2 sujet slide 8)
+        // Vérification des contraintes sur les amplitudes (TP2 sujet page 8)
         if (transmissionAnalogique) {
             if ("RZ".equalsIgnoreCase(formeOnde)) {
                 // Contraintes RZ : Amax >= 0, Amin = 0, Amin < Amax
