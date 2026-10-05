@@ -206,10 +206,13 @@ public class TransmetteurAnalogiqueTrajetsMultiples extends Transmetteur<Float, 
     /** @return snrpb (Eb/N0 en dB), ou null si transmission non bruitee */
     public Float getSnrpb() { return this.snrpb; }
 
+ /** @return le nombre d'echantillons par symbole, utilise pour le calcul de la variance du bruit */
     public int getNbEch() { return this.nbEch; }
 
+    /** @return la semence du generateur aleatoire, ou null si aucune semence n'a ete fixee */
     public Integer getSeed() { return this.seed; }
 
+    /** @return le nombre de trajets indirects simules, entre 0 et 5 */
     public int getNbTrajets() { return this.nbTrajets; }
 
     /** @return une copie des decalages (en nombre d'echantillons) de chaque trajet indirect */
@@ -221,12 +224,12 @@ public class TransmetteurAnalogiqueTrajetsMultiples extends Transmetteur<Float, 
     /** @return true si la transmission est bruitee (snrpb != null) */
     public boolean isBruite() { return this.bruiteur != null; }
 
-    /** Renvoie la puissance moyenne du signal composite, calculee par le bruiteur interne (0 si non bruite). */
+      /** @return la puissance moyenne du signal composite, calculee par le bruiteur interne, ou 0 si la transmission n'est pas bruitee */
     public float getPuissanceSignal() { return (this.bruiteur != null) ? this.bruiteur.getPuissanceSignal() : 0.0f; }
 
-    /** Renvoie l'ecart-type du bruit gaussien, calcule par le bruiteur interne (0 si non bruite). */
+    /** @return l'ecart-type du bruit gaussien, calcule par le bruiteur interne, ou 0 si la transmission n'est pas bruitee */
     public float getSigmaBruit() { return (this.bruiteur != null) ? this.bruiteur.getSigmaBruit() : 0.0f; }
 
-    /** Renvoie la sequence de bruit generee par le bruiteur interne (null si non bruite). */
+    /** @return la sequence de bruit ajoutee au signal, ou null si la transmission n'est pas bruitee */
     public Information<Float> getBruitGenere() { return (this.bruiteur != null) ? this.bruiteur.getBruitGenere() : null; }
 }

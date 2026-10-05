@@ -733,13 +733,16 @@ public class RecepteurSonde extends Transmetteur<Float, Boolean> {
     }
 
     // --- Accesseurs ---
-
+    /** @return la forme d'onde utilisee pour la demodulation : NRZ, NRZT ou RZ */
     public String getFormeOnde() { return this.formeOnde; }
 
+    /** @return le nombre d'echantillons par symbole utilise pour decouper le signal recu */
     public int getNbEch() { return this.nbEch; }
 
+    /** @return l'amplitude associee au symbole logique 0 */
     public float getAmplMin() { return this.amplMin; }
 
+    /** @return l'amplitude associee au symbole logique 1 */
     public float getAmplMax() { return this.amplMax; }
 
     /** @return les decalages (en echantillons) des trajets indirects detectes lors de la derniere reception */
