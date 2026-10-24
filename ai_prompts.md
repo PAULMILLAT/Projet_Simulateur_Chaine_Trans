@@ -74,3 +74,8 @@ Caused by: java.lang.ClassNotFoundException: tests.TestSimulateur quand j'execut
     * Gemini a validé nos calculs et la cohérence de nos résultats. Il a suggéré quelques améliorations sur la notation utilisée.
 * Vérifie les fautes d'orthographe et de syntaxe dans nos commentaires et dans la javadoc. Fais la liste de tes suggestions de modification
     * Je préfère que l'IA fasse une liste de suggestion plutôt que de nous fournir des commentaires déjà corrigés, afin de pouvoir sélectionner moi même les modifications pertinentes.
+
+
+## Prompts du TP6
+* Vérifie si nos calculs pour les environnements 1 et 2 du TP6 sont bons et si nos réponses répondent bien à toutes les consignes du sujet.
+    * Nous avons utilisé Gemini et Claude pour vérifier la justesse de nos calculs et nous assurer que nous répondions bien à la consigne.
